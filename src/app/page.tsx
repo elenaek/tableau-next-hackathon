@@ -4,67 +4,64 @@ import { useState } from "react";
 import { useAuth } from './context/AuthContext';
 import LoginForm from './components/LoginForm';
 import MenuBar from './components/MenuBar';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  ChevronDown,
+  ChevronRight,
+  CheckCircle,
+  Circle,
+  Clock,
+  MapPin,
+  Calendar,
+  User,
+  Stethoscope,
+  BarChart3
+} from 'lucide-react';
 
-const StatusBadge = ({ status, color }: { status: string; color: string }) => (
-  <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>
-    {status}
-  </span>
-);
-
-const NotesPopover = ({ title, notes, isOpen, onToggle }: {
-  title: string;
-  notes: string;
-  isOpen: boolean;
-  onToggle: () => void;
-}) => {
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  const updatePosition = () => {
-    if (buttonRef) {
-      const rect = buttonRef.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 8,
-        left: rect.left + rect.width - 320 // Position so the popover's right edge aligns with button's right edge
-      });
+const StatusBadge = ({ status, variant = "default" }: { status: string; variant?: "default" | "secondary" | "destructive" | "outline" }) => {
+  const getVariant = () => {
+    switch (status.toLowerCase()) {
+      case 'recovery':
+      case 'active':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'completed':
+        return 'outline';
+      default:
+        return variant;
     }
   };
 
   return (
-    <div className="relative">
-      <button
-        ref={setButtonRef}
-        onClick={() => {
-          updatePosition();
-          onToggle();
-        }}
-        className="text-blue-600 hover:text-blue-800 text-sm underline flex-shrink-0"
-      >
-        View Notes
-      </button>
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={onToggle} />
-          <div
-            className="fixed z-50 w-80 bg-white border border-gray-200 rounded-lg shadow-xl p-4 max-h-64 overflow-y-auto"
-            style={{
-              top: `${position.top}px`,
-              left: `${Math.max(8, position.left)}px` // Ensure at least 8px from left edge
-            }}
-          >
-            <div className="flex justify-between items-start mb-2">
-              <h4 className="font-medium text-gray-900 pr-4">{title}</h4>
-              <button onClick={onToggle} className="text-gray-400 hover:text-gray-600 flex-shrink-0">
-                ✕
-              </button>
-            </div>
-            <p className="text-sm text-gray-700 leading-relaxed">{notes}</p>
-          </div>
-        </>
-      )}
-    </div>
+    <Badge variant={getVariant()}>
+      {status}
+    </Badge>
   );
 };
+
+const NotesPopover = ({ title, notes }: {
+  title: string;
+  notes: string;
+}) => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="link" size="sm" className="h-auto p-0 text-sm underline">
+        View Notes
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-80 max-h-64 overflow-y-auto" align="end">
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm">{title}</h4>
+        <p className="text-sm text-muted-foreground leading-relaxed">{notes}</p>
+      </div>
+    </PopoverContent>
+  </Popover>
+);
 
 const ExpandableProgressStep = ({
   step,
@@ -79,61 +76,76 @@ const ExpandableProgressStep = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(isActive);
 
-  return (
-    <div className="w-full">
-      <div
-        className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0 ${
-          isCompleted ? 'bg-green-500 text-white' :
-          isActive ? 'bg-blue-500 text-white' :
-          'bg-gray-200 text-gray-600'
-        }`}>
-          {isCompleted ? '✓' : isActive ? '•' : ''}
-        </div>
-        <span className={`flex-1 text-sm ${isActive ? 'font-semibold text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
-          {step}
-        </span>
-        {subSteps.length > 0 && (
-          <div className="text-gray-400 flex-shrink-0 text-sm">
-            {isExpanded ? '▼' : '▶'}
-          </div>
-        )}
-      </div>
+  const getStepIcon = () => {
+    if (isCompleted) return <CheckCircle className="h-4 w-4 text-green-600" />;
+    if (isActive) return <Clock className="h-4 w-4 text-blue-600" />;
+    return <Circle className="h-4 w-4 text-muted-foreground" />;
+  };
 
-      {isExpanded && subSteps.length > 0 && (
-        <div className="ml-11 mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
-          {subSteps.map((subStep, index) => (
-            <div key={index} className="flex items-start justify-between text-sm min-h-[1.5rem]">
-              <div className="flex items-start space-x-2 flex-1">
-                <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                  subStep.status === 'completed' ? 'bg-green-400' :
-                  subStep.status === 'in-progress' ? 'bg-blue-400' :
-                  'bg-gray-300'
-                }`} />
-                <span className={`leading-relaxed ${
-                  subStep.status === 'completed' ? 'text-green-600 line-through' :
-                  subStep.status === 'in-progress' ? 'text-blue-600 font-medium' :
-                  'text-gray-500'
-                }`}>
-                  {subStep.task}
-                </span>
-              </div>
-              {subStep.time && (
-                <span className="text-xs text-gray-400 ml-2 flex-shrink-0 mt-0.5">{subStep.time}</span>
-              )}
+  const getSubStepIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-3 w-3 text-green-500" />;
+      case 'in-progress':
+        return <Clock className="h-3 w-3 text-blue-500" />;
+      default:
+        return <Circle className="h-3 w-3 text-muted-foreground" />;
+    }
+  };
+
+  return (
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="w-full justify-start p-2 h-auto hover:bg-muted/50"
+          disabled={subSteps.length === 0}
+        >
+          <div className="flex items-center space-x-3 w-full">
+            {getStepIcon()}
+            <span className={`flex-1 text-left text-sm ${
+              isActive ? 'font-semibold text-primary' :
+              isCompleted ? 'text-green-600' :
+              'text-muted-foreground'
+            }`}>
+              {step}
+            </span>
+            {subSteps.length > 0 && (
+              isExpanded ?
+                <ChevronDown className="h-4 w-4 text-muted-foreground" /> :
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+        </Button>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className="ml-7 mt-2 space-y-2">
+        {subSteps.map((subStep, index) => (
+          <div key={index} className="flex items-start justify-between text-sm min-h-[1.5rem] py-1">
+            <div className="flex items-start space-x-2 flex-1">
+              {getSubStepIcon(subStep.status)}
+              <span className={`leading-relaxed ${
+                subStep.status === 'completed' ? 'text-green-600 line-through' :
+                subStep.status === 'in-progress' ? 'text-blue-600 font-medium' :
+                'text-muted-foreground'
+              }`}>
+                {subStep.task}
+              </span>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+            {subStep.time && (
+              <span className="text-xs text-muted-foreground ml-2 flex-shrink-0 mt-0.5">
+                {subStep.time}
+              </span>
+            )}
+          </div>
+        ))}
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
 const PhysicianSection = () => {
   const [expandedConsults, setExpandedConsults] = useState(false);
-  const [openNotes, setOpenNotes] = useState<string | null>(null);
 
   const roundingPhysician = {
     name: "Dr. Martinez",
@@ -172,61 +184,66 @@ const PhysicianSection = () => {
     <div className="space-y-4 w-full">
       {/* Rounding Physician */}
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">Rounding Physician</h3>
-        <div className="bg-blue-50 rounded-lg p-3">
-          <div className="flex justify-between items-start gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-gray-900 font-medium truncate">{roundingPhysician.name}</p>
-              <p className="text-sm text-gray-600">{roundingPhysician.specialty}</p>
+        <h3 className="text-sm font-medium text-muted-foreground mb-3">Rounding Physician</h3>
+        <Card className="bg-blue-50/50 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex items-center space-x-2 flex-1 min-w-0">
+                <Stethoscope className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{roundingPhysician.name}</p>
+                  <p className="text-sm text-muted-foreground">{roundingPhysician.specialty}</p>
+                </div>
+              </div>
+              <NotesPopover
+                title={`${roundingPhysician.name} - Rounding Notes`}
+                notes={roundingPhysician.notes}
+              />
             </div>
-            <NotesPopover
-              title={`${roundingPhysician.name} - Rounding Notes`}
-              notes={roundingPhysician.notes}
-              isOpen={openNotes === 'rounding'}
-              onToggle={() => setOpenNotes(openNotes === 'rounding' ? null : 'rounding')}
-            />
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Consults */}
       <div>
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-medium text-gray-500">Consults</h3>
-          <button
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-sm font-medium text-muted-foreground">Consults</h3>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setExpandedConsults(!expandedConsults)}
-            className="text-xs text-blue-600 hover:text-blue-800 flex-shrink-0"
+            className="text-xs h-auto p-1"
           >
             {expandedConsults ? 'Show Less' : 'Show All'}
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-2">
           {consults.slice(0, expandedConsults ? consults.length : 1).map((consult) => (
-            <div key={consult.id} className="bg-gray-50 rounded-lg p-3">
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center flex-wrap gap-2 mb-1">
-                    <p className="text-sm font-medium text-gray-900">{consult.department}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
-                      consult.status === 'Active' ? 'bg-green-100 text-green-800' :
-                      consult.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {consult.status}
-                    </span>
+            <Card key={consult.id} className="bg-muted/30">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center flex-wrap gap-2 mb-2">
+                      <p className="text-sm font-medium">{consult.department}</p>
+                      <StatusBadge status={consult.status} />
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                      <User className="h-3 w-3" />
+                      <span className="truncate">{consult.physician}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{consult.lastUpdate}</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-600 truncate">{consult.physician}</p>
-                  <p className="text-xs text-gray-500">{consult.lastUpdate}</p>
+                  <NotesPopover
+                    title={`${consult.department} - ${consult.physician}`}
+                    notes={consult.notes}
+                  />
                 </div>
-                <NotesPopover
-                  title={`${consult.department} - ${consult.physician}`}
-                  notes={consult.notes}
-                  isOpen={openNotes === consult.id}
-                  onToggle={() => setOpenNotes(openNotes === consult.id ? null : consult.id)}
-                />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
@@ -234,19 +251,9 @@ const PhysicianSection = () => {
   );
 };
 
-const InfoCard = ({ title, value, subtitle, icon }: { title: string; value: string; subtitle?: string; icon: string }) => (
-  <div className="bg-white rounded-lg shadow-sm border p-6">
-    <div className="flex items-center justify-between mb-2">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-      <span className="text-2xl">{icon}</span>
-    </div>
-    <div className="text-2xl font-bold text-gray-900">{value}</div>
-    {subtitle && <div className="text-sm text-gray-500 mt-1">{subtitle}</div>}
-  </div>
-);
 
 export default function PatientDashboard() {
-  const { authState, login, logout, isLoading } = useAuth();
+  const { authState, login, isLoading } = useAuth();
   const [loginError, setLoginError] = useState('');
 
   // Sample patient data
@@ -340,24 +347,34 @@ export default function PatientDashboard() {
         {/* Sidebar */}
         <div className="w-80 min-w-80 bg-white shadow-lg flex flex-col overflow-hidden">
           {/* Patient Header - Fixed */}
-          <div className="flex-shrink-0 p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+          <div className="flex-shrink-0 p-6 border-b bg-gradient-to-r from-primary to-blue-600 text-primary-foreground">
             <h1 className="text-xl font-bold">{patientData.name}</h1>
-            <p className="text-blue-100">{patientData.mrn}</p>
-            <StatusBadge status={patientData.currentStatus} color="bg-blue-100 text-blue-800 mt-2" />
+            <p className="text-primary-foreground/80">{patientData.mrn}</p>
+            <div className="mt-2">
+              <StatusBadge status={patientData.currentStatus} variant="outline" />
+            </div>
           </div>
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto">
             {/* Key Info */}
             <div className="p-6 space-y-4 border-b">
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Current Location</h3>
-                <p className="text-gray-900">{patientData.currentLocation}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Estimated Discharge</h3>
-                <p className="text-gray-900 font-semibold">{patientData.estimatedDischarge}</p>
-                <p className="text-sm text-blue-600">{patientData.daysRemaining} days remaining</p>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Current Location</h3>
+                    <p className="text-foreground">{patientData.currentLocation}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Estimated Discharge</h3>
+                    <p className="font-semibold">{patientData.estimatedDischarge}</p>
+                    <p className="text-sm text-primary">{patientData.daysRemaining} days remaining</p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -368,8 +385,8 @@ export default function PatientDashboard() {
 
             {/* Progress Steps */}
             <div className="p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-4">Treatment Progress</h3>
-              <div className="space-y-4">
+              <h3 className="text-sm font-medium text-muted-foreground mb-4">Treatment Progress</h3>
+              <div className="space-y-2">
                 {progressSteps.map((item, index) => (
                   <ExpandableProgressStep key={index} {...item} />
                 ))}
@@ -380,13 +397,15 @@ export default function PatientDashboard() {
 
         {/* Main Content Area for Tableau */}
         <div className="flex-1 p-6 overflow-hidden">
-          <div className="bg-white rounded-lg shadow-sm h-full border-2 border-dashed border-gray-300 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Tableau Dashboard</h3>
-              <p className="text-gray-500">Your health metrics and progress charts will appear here</p>
-            </div>
-          </div>
+          <Card className="h-full border-2 border-dashed">
+            <CardContent className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <CardTitle className="text-lg mb-2">Tableau Dashboard</CardTitle>
+                <p className="text-muted-foreground">Your health metrics and progress charts will appear here</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
