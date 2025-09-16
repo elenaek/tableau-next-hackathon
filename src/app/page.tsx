@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from './context/AuthContext';
 import LoginForm from './components/LoginForm';
+import MenuBar from './components/MenuBar';
 
 const StatusBadge = ({ status, color }: { status: string; color: string }) => (
   <span className={`px-3 py-1 rounded-full text-sm font-medium ${color}`}>
@@ -246,7 +247,6 @@ const InfoCard = ({ title, value, subtitle, icon }: { title: string; value: stri
 
 export default function PatientDashboard() {
   const { authState, login, logout, isLoading } = useAuth();
-  const [activeLayout, setActiveLayout] = useState('default');
   const [loginError, setLoginError] = useState('');
 
   // Sample patient data
@@ -329,210 +329,62 @@ export default function PatientDashboard() {
     }
   ];
 
-  const layoutOptions = [
-    { id: 'default', name: 'Sidebar Layout' },
-    { id: 'grid', name: 'Grid Layout' },
-    { id: 'card', name: 'Card Layout' },
-    { id: 'timeline', name: 'Timeline Layout' }
-  ];
 
-  const renderDefaultLayout = () => (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar */}
-      <div className="w-80 min-w-80 bg-white shadow-lg flex flex-col overflow-hidden">
-        {/* Patient Header - Fixed */}
-        <div className="flex-shrink-0 p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-          <h1 className="text-xl font-bold">{patientData.name}</h1>
-          <p className="text-blue-100">{patientData.mrn}</p>
-          <StatusBadge status={patientData.currentStatus} color="bg-blue-100 text-blue-800 mt-2" />
-        </div>
+  const renderSidebarLayout = () => (
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      {/* Menu Bar */}
+      <MenuBar />
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* Key Info */}
-          <div className="p-6 space-y-4 border-b">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Current Location</h3>
-              <p className="text-gray-900">{patientData.currentLocation}</p>
+      {/* Main Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className="w-80 min-w-80 bg-white shadow-lg flex flex-col overflow-hidden">
+          {/* Patient Header - Fixed */}
+          <div className="flex-shrink-0 p-6 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <h1 className="text-xl font-bold">{patientData.name}</h1>
+            <p className="text-blue-100">{patientData.mrn}</p>
+            <StatusBadge status={patientData.currentStatus} color="bg-blue-100 text-blue-800 mt-2" />
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Key Info */}
+            <div className="p-6 space-y-4 border-b">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Current Location</h3>
+                <p className="text-gray-900">{patientData.currentLocation}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Estimated Discharge</h3>
+                <p className="text-gray-900 font-semibold">{patientData.estimatedDischarge}</p>
+                <p className="text-sm text-blue-600">{patientData.daysRemaining} days remaining</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Estimated Discharge</h3>
-              <p className="text-gray-900 font-semibold">{patientData.estimatedDischarge}</p>
-              <p className="text-sm text-blue-600">{patientData.daysRemaining} days remaining</p>
+
+            {/* Physician Section */}
+            <div className="p-6 border-b">
+              <PhysicianSection />
             </div>
-          </div>
 
-          {/* Physician Section */}
-          <div className="p-6 border-b">
-            <PhysicianSection />
-          </div>
-
-          {/* Progress Steps */}
-          <div className="p-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-4">Treatment Progress</h3>
-            <div className="space-y-4">
-              {progressSteps.map((item, index) => (
-                <ExpandableProgressStep key={index} {...item} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area for Tableau */}
-      <div className="flex-1 p-6 overflow-hidden">
-        <div className="bg-white rounded-lg shadow-sm h-full border-2 border-dashed border-gray-300 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Tableau Dashboard</h3>
-            <p className="text-gray-500">Your health metrics and progress charts will appear here</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderGridLayout = () => (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{patientData.name}</h1>
-              <p className="text-gray-500">{patientData.mrn} • {patientData.currentLocation}</p>
-            </div>
-            <StatusBadge status={patientData.currentStatus} color="bg-green-100 text-green-800" />
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <InfoCard title="Days in Hospital" value="7" subtitle="Since admission" icon="🏥" />
-        <InfoCard title="Estimated Discharge" value="Jan 22" subtitle="3 days remaining" icon="📅" />
-        <InfoCard title="Primary Physician" value="Dr. Martinez" subtitle="Cardiology" icon="👩‍⚕️" />
-        <InfoCard title="Next Appointment" value="Tomorrow" subtitle="10:00 AM" icon="⏰" />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Progress Timeline */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Treatment Progress</h3>
-          <div className="space-y-4">
-            {progressSteps.map((item, index) => (
-              <ExpandableProgressStep key={index} {...item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Tableau Dashboard */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border-2 border-dashed border-gray-300 flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Health Metrics Dashboard</h3>
-            <p className="text-gray-500">Interactive charts and vital signs</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCardLayout = () => (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Hero Card */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg text-white p-8 mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{patientData.name}</h1>
-            <p className="text-blue-100 mb-4">{patientData.mrn} • Admitted {patientData.admissionDate}</p>
-            <StatusBadge status={patientData.currentStatus} color="bg-white/20 text-white" />
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-blue-100">Estimated Discharge</div>
-            <div className="text-2xl font-bold">{patientData.estimatedDischarge}</div>
-            <div className="text-blue-100">{patientData.daysRemaining} days to go</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Progress Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-6">Your Journey</h3>
-          <div className="space-y-4">
-            {progressSteps.map((item, index) => (
-              <ExpandableProgressStep key={index} {...item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Tableau Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Health Dashboard</h3>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg h-80 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <p className="text-gray-500">Tableau metrics embedded here</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTimelineLayout = () => (
-    <div className="min-h-screen bg-gray-50">
-      {/* Fixed Header */}
-      <div className="bg-white shadow-sm border-b p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{patientData.name}</h1>
-            <p className="text-gray-500">{patientData.mrn}</p>
-          </div>
-          <StatusBadge status={patientData.currentStatus} color="bg-blue-100 text-blue-800" />
-        </div>
-      </div>
-
-      <div className="flex">
-        {/* Timeline Sidebar */}
-        <div className="w-96 bg-white shadow-sm h-screen overflow-y-auto">
-          <div className="p-6">
-            <h3 className="text-lg font-semibold mb-6">Treatment Timeline</h3>
-            <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-              {progressSteps.map((item, index) => (
-                <div key={index} className="relative flex items-center pb-8">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium z-10 ${
-                    item.isCompleted ? 'bg-green-500 text-white' :
-                    item.isActive ? 'bg-blue-500 text-white' :
-                    'bg-gray-200 text-gray-600'
-                  }`}>
-                    {item.isCompleted ? '✓' : item.isActive ? '•' : index + 1}
-                  </div>
-                  <div className="ml-4">
-                    <div className={`font-medium ${item.isActive ? 'text-blue-600' : item.isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
-                      {item.step}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {item.isCompleted ? 'Completed' : item.isActive ? 'In Progress' : 'Upcoming'}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {/* Progress Steps */}
+            <div className="p-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-4">Treatment Progress</h3>
+              <div className="space-y-4">
+                {progressSteps.map((item, index) => (
+                  <ExpandableProgressStep key={index} {...item} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6">
+        {/* Main Content Area for Tableau */}
+        <div className="flex-1 p-6 overflow-hidden">
           <div className="bg-white rounded-lg shadow-sm h-full border-2 border-dashed border-gray-300 flex items-center justify-center">
             <div className="text-center">
               <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Real-time Health Metrics</h3>
-              <p className="text-gray-500">Timeline-focused dashboard with historical data</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Tableau Dashboard</h3>
+              <p className="text-gray-500">Your health metrics and progress charts will appear here</p>
             </div>
           </div>
         </div>
@@ -540,14 +392,6 @@ export default function PatientDashboard() {
     </div>
   );
 
-  const renderLayout = () => {
-    switch (activeLayout) {
-      case 'grid': return renderGridLayout();
-      case 'card': return renderCardLayout();
-      case 'timeline': return renderTimelineLayout();
-      default: return renderDefaultLayout();
-    }
-  };
 
   const handleLogin = async (username: string, password: string) => {
     setLoginError('');
@@ -574,37 +418,5 @@ export default function PatientDashboard() {
     return <LoginForm onLogin={handleLogin} error={loginError} />;
   }
 
-  return (
-    <div>
-      {/* Layout Switcher */}
-      <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium">Layout Options</h4>
-          <button
-            onClick={logout}
-            className="text-xs text-red-600 hover:text-red-800"
-          >
-            Logout
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {layoutOptions.map((layout) => (
-            <button
-              key={layout.id}
-              onClick={() => setActiveLayout(layout.id)}
-              className={`px-3 py-2 text-xs rounded transition-colors ${
-                activeLayout === layout.id
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {layout.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {renderLayout()}
-    </div>
-  );
+  return renderSidebarLayout();
 }
