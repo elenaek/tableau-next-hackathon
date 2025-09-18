@@ -22,12 +22,16 @@ import {
   User,
   Users
 } from 'lucide-react';
-import TableauDashboard from '@/components/TableauDashboard';
+// import TableauDashboard from '@/components/TableauDashboard';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { LoadingInsight } from '@/components/LoadingInsight';
 import { AIDisclaimer } from '@/components/AIDisclaimer';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
+import { AnimatedCard } from '@/components/ui/animated-card';
+// import { TextGenerateEffect } from '@/components/ui/text-generate-effect';
+import { Sparkles } from '@/components/ui/sparkles';
+import { FloatingNotification } from '@/components/ui/floating-notification';
 
 interface PatientData {
   id: string;
@@ -273,6 +277,8 @@ export default function PatientDashboard() {
   const [departmentInsight, setDepartmentInsight] = useState<AIInsight | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingInsightType, setLoadingInsightType] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
 
   const patientId = 'patient-123';
 
@@ -402,14 +408,18 @@ export default function PatientDashboard() {
         switch(type) {
           case 'diagnosis-explainer':
             setDiagnosisInsight(insight);
+            setNotificationMessage('Diagnosis explanation generated successfully!');
             break;
           case 'treatment-progress':
             setProgressInsight(insight);
+            setNotificationMessage('Treatment progress analysis complete!');
             break;
           case 'department-busyness':
             setDepartmentInsight(insight);
+            setNotificationMessage('Department status updated!');
             break;
         }
+        setShowNotification(true);
       }
     } catch (error) {
       console.error('Error generating insight:', error);
@@ -436,7 +446,9 @@ export default function PatientDashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Patient Dashboard</h1>
+          <Sparkles className="inline-block" particleColor="lightblue" particleCount={10}>
+            <h1 className="text-3xl font-bold">Patient Dashboard</h1>
+          </Sparkles>
           <p className="text-muted-foreground">Your healthcare journey at a glance</p>
         </div>
         <Badge variant="outline" className="text-sm px-2 py-1">
@@ -446,42 +458,44 @@ export default function PatientDashboard() {
       </div>
 
       {/* Patient Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Patient Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Name</p>
-              <p className="font-medium">{patientData?.name}</p>
+      <AnimatedCard>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Patient Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Name</p>
+                <p className="font-medium">{patientData?.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Medical Record Number</p>
+                <p className="font-medium">{patientData?.medicalRecordNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Date of Birth</p>
+                <p className="font-medium">{new Date(patientData?.dateOfBirth || '').toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Room Number</p>
+                <p className="font-medium">{patientData?.roomNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Department</p>
+                <p className="font-medium">{patientData?.department}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Admission Date</p>
+                <p className="font-medium">{new Date(patientData?.admissionDate || '').toLocaleDateString()}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Medical Record Number</p>
-              <p className="font-medium">{patientData?.medicalRecordNumber}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Date of Birth</p>
-              <p className="font-medium">{new Date(patientData?.dateOfBirth || '').toLocaleDateString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Room Number</p>
-              <p className="font-medium">{patientData?.roomNumber}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Department</p>
-              <p className="font-medium">{patientData?.department}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Admission Date</p>
-              <p className="font-medium">{new Date(patientData?.admissionDate || '').toLocaleDateString()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </AnimatedCard>
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -489,6 +503,7 @@ export default function PatientDashboard() {
         <div className="space-y-6">
 
           {/* Physicians and Consults */}
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -501,8 +516,10 @@ export default function PatientDashboard() {
               <PhysicianSection />
             </CardContent>
           </Card>
+          </AnimatedCard>
           
           {/* Treatment Progress */}
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -519,8 +536,10 @@ export default function PatientDashboard() {
               </div>
             </CardContent>
           </Card>
+          </AnimatedCard>
 
           {/* Treatment Progress Insight */}
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -566,11 +585,13 @@ export default function PatientDashboard() {
               )}
             </CardContent>
           </Card>
+          </AnimatedCard>
         </div>
 
         {/* Right Column - Diagnosis and Insights */}
         <div className="space-y-6">
           {/* Current Diagnosis */}
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -628,8 +649,10 @@ export default function PatientDashboard() {
               )}
             </CardContent>
           </Card>
+          </AnimatedCard>
 
           {/* Department Status */}
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -696,11 +719,12 @@ export default function PatientDashboard() {
               )}
             </CardContent>
           </Card>
+          </AnimatedCard>
         </div>
       </div>
 
       {/* Tableau Dashboard */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
@@ -715,8 +739,18 @@ export default function PatientDashboard() {
             className="rounded-lg"
           />
         </CardContent>
-      </Card>
+      </Card> */}
       </div>
+
+      {/* Floating Notification */}
+      <FloatingNotification
+        show={showNotification}
+        onClose={() => setShowNotification(false)}
+        title="AI Insight Generated"
+        description={notificationMessage}
+        type="success"
+        duration={4000}
+      />
     </div>
   );
 }

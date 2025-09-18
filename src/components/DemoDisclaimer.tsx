@@ -5,8 +5,8 @@ import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 
 export function DemoDisclaimer() {
-  const demoBanner = localStorage.getItem(LOCAL_STORAGE_KEYS.DEMO_BANNER);
-  const projectBanner = localStorage.getItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER);
+  const demoBanner = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_KEYS.DEMO_BANNER) : null;
+  const projectBanner = typeof window !== 'undefined' ? localStorage.getItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER) : null;
   const [isVisible, setIsVisible] = useState({
     demoBanner: demoBanner ? demoBanner === 'true' : true,
     projectBanner: projectBanner ? projectBanner === 'true' : true,

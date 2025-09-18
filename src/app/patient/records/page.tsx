@@ -17,10 +17,13 @@ import {
   FlaskConical,
   Image,
   FileX,
-  ChevronRight,
-  Eye
+  ChevronRight
+  // Eye
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { Sparkles } from '@/components/ui/sparkles';
+import { motion } from 'framer-motion';
 
 interface MedicalRecord {
   id: string;
@@ -170,11 +173,14 @@ export default function MedicalRecordsPage() {
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Medical Records</h1>
+          <Sparkles className="inline-block" particleColor="#10b981" particleCount={10}>
+            <h1 className="text-3xl font-bold">Medical Records</h1>
+          </Sparkles>
           <p className="text-muted-foreground">Access your complete medical history and documents</p>
         </div>
 
         {/* Search and Filters */}
+        <AnimatedCard>
         <Card>
           <CardHeader>
             <CardTitle>Search Records</CardTitle>
@@ -213,11 +219,13 @@ export default function MedicalRecordsPage() {
             </div>
           </CardContent>
         </Card>
+        </AnimatedCard>
 
         {/* Records Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Records List */}
           <div className="lg:col-span-2 space-y-4">
+            <AnimatedCard>
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -232,9 +240,13 @@ export default function MedicalRecordsPage() {
                     <p>No records found matching your search</p>
                   </div>
                 ) : (
-                  filteredRecords.map((record) => (
-                    <div
+                  filteredRecords.map((record, index) => (
+                    <motion.div
                       key={record.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      whileHover={{ x: 5 }}
                       className={`p-4 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
                         selectedRecord?.id === record.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
                       }`}
@@ -285,16 +297,18 @@ export default function MedicalRecordsPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))
                 )}
               </CardContent>
             </Card>
+            </AnimatedCard>
           </div>
 
           {/* Record Details */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-6">
+            <AnimatedCard containerClassName="sticky top-6">
+            <Card>
               <CardHeader>
                 <CardTitle>Record Details</CardTitle>
                 <CardDescription>
@@ -354,16 +368,12 @@ export default function MedicalRecordsPage() {
                       )}
                     </div>
 
-                    <div className="flex gap-2 pt-4">
+                    {/* <div className="flex gap-2 pt-4">
                       <Button className="flex-1" size="sm">
                         <Eye className="h-4 w-4 mr-2" />
                         View Full Record
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                    </div>
+                    </div> */}
 
                     {selectedRecord.attachments && selectedRecord.attachments > 0 && (
                       <div className="border-t pt-4">
@@ -392,32 +402,49 @@ export default function MedicalRecordsPage() {
                 )}
               </CardContent>
             </Card>
+            </AnimatedCard>
           </div>
         </div>
 
         {/* Summary Statistics */}
+        <AnimatedCard>
         <Card>
           <CardHeader>
             <CardTitle>Records Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Object.entries(recordTypeConfig).map(([type, config]) => {
+              {Object.entries(recordTypeConfig).map(([type, config], index) => {
                 const count = mockRecords.filter(r => r.type === type).length;
                 const Icon = config.icon;
                 return (
-                  <div key={type} className="text-center p-4 rounded-lg bg-secondary">
+                  <motion.div
+                    key={type}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="text-center p-4 rounded-lg bg-secondary"
+                  >
                     <div className={`inline-flex p-3 rounded-lg mb-2 ${config.color}`}>
                       <Icon className="h-6 w-6" />
                     </div>
-                    <p className="text-2xl font-bold">{count}</p>
+                    <motion.p
+                      className="text-2xl font-bold"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 + 0.3, type: "spring" }}
+                    >
+                      {count}
+                    </motion.p>
                     <p className="text-xs text-muted-foreground capitalize">{type}</p>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
           </CardContent>
         </Card>
+        </AnimatedCard>
       </div>
     </div>
   );

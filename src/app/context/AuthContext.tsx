@@ -24,13 +24,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
 
     window.addEventListener('beforeunload', () => {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
-      localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
     });
     return () => {
       window.removeEventListener('beforeunload', () => {
-        localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
-        localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+        window.localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
+        window.localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
       });
     }
   }, []);

@@ -67,7 +67,7 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
                   <Link href={item.href}>
                     <Button
                       variant={isActive ? "secondary" : "ghost"}
-                      className={`w-full ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
+                      className={`w-full cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
                       title={isCollapsed ? item.tooltip : undefined}
                     >
                       <Icon className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4 mr-3'}`} />
@@ -85,7 +85,7 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
           <Link href="/patient/settings">
             <Button
               variant="ghost"
-              className={`w-full mb-2 ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
+              className={`w-full mb-2 cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
               title={isCollapsed ? 'Settings' : undefined}
             >
               <Settings className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4 mr-3'}`} />
@@ -94,11 +94,11 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
           </Link>
           <Button
             variant="ghost"
-            className={`w-full ${isCollapsed ? 'justify-center px-0' : 'justify-start text-red-500 hover:text-red-600'}`}
+            className={`w-full cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start text-red-500 hover:text-red-600'}`}
             onClick={handleLogout}
             title={isCollapsed ? 'Sign Out' : undefined}
           >
-            <LogOut className={`${isCollapsed ? 'h-5 w-5 text-red-500' : 'h-4 w-4 mr-3'}`} />
+            <LogOut className={`cursor-pointer ${isCollapsed ? 'h-5 w-5 text-red-500' : 'h-4 w-4 mr-3'}`} />
             {!isCollapsed && <span>Sign Out</span>}
           </Button>
         </div>

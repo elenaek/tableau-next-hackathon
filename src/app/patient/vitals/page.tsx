@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import {
   Heart,
   Activity,
@@ -16,11 +16,14 @@ import {
   Clock,
   Calendar,
   AlertCircle,
-  Info,
-  ChevronLeft,
-  ChevronRight
+  Info
+  // ChevronLeft,
+  // ChevronRight
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
+import { Sparkles } from '@/components/ui/sparkles';
+import { AnimatedCard } from '@/components/ui/animated-card';
+import { motion } from 'framer-motion';
 
 interface VitalReading {
   timestamp: string;
@@ -208,7 +211,7 @@ export default function VitalsPage() {
     });
   };
 
-  // Simple chart component using CSS
+  // Simple chart component using CSS with animation
   const MiniChart = ({ data }: { data: VitalReading[] }) => {
     const max = Math.max(...data.map(d => d.value));
     const min = Math.min(...data.map(d => d.value));
@@ -219,15 +222,17 @@ export default function VitalsPage() {
         {data.map((reading, index) => {
           const height = ((reading.value - min) / range) * 100;
           return (
-            <div
+            <motion.div
               key={index}
+              initial={{ height: 0 }}
+              animate={{ height: `${Math.max(height, 10)}%` }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className="flex-1 bg-primary/20 hover:bg-primary/30 transition-all relative group"
-              style={{ height: `${Math.max(height, 10)}%` }}
             >
               <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-popover border rounded px-2 py-1 text-xs hidden group-hover:block whitespace-nowrap z-10">
                 {reading.value} {reading.unit}
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -241,7 +246,9 @@ export default function VitalsPage() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
+          <Sparkles className="inline-block" particleColor="pink" particleCount={10}>
             <h1 className="text-3xl font-bold">Vital Signs</h1>
+          </Sparkles>
             <p className="text-muted-foreground">Monitor your health metrics and trends</p>
           </div>
           <Badge variant="outline" className="text-sm px-2 py-1">
@@ -252,9 +259,16 @@ export default function VitalsPage() {
 
         {/* Current Vitals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {mockVitals.map((vital) => {
+          {mockVitals.map((vital, index) => {
             const Icon = vital.icon;
             return (
+              <motion.div
+                key={vital.type}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+              >
+              <AnimatedCard>
               <Card
                 key={vital.type}
                 className={`cursor-pointer transition-all hover:shadow-lg ${
@@ -302,12 +316,15 @@ export default function VitalsPage() {
                   </div>
                 </CardContent>
               </Card>
+              </AnimatedCard>
+              </motion.div>
             );
           })}
         </div>
 
         {/* Detailed View */}
         {selectedVital && (
+          <AnimatedCard>
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -320,19 +337,24 @@ export default function VitalsPage() {
                     <CardDescription>Tracking history and analysis</CardDescription>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <Button variant="outline" size="icon">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="icon">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
-                </div>
+                </div> */}
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Current Reading */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
+                >
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center">
@@ -352,7 +374,13 @@ export default function VitalsPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </motion.div>
 
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
+                >
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center">
@@ -370,7 +398,13 @@ export default function VitalsPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </motion.div>
 
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                >
                 <Card>
                   <CardContent className="pt-6">
                     <div className="text-center">
@@ -383,6 +417,7 @@ export default function VitalsPage() {
                     </div>
                   </CardContent>
                 </Card>
+                </motion.div>
               </div>
 
               {/* Recent Readings Table */}
@@ -446,9 +481,11 @@ export default function VitalsPage() {
               )}
             </CardContent>
           </Card>
+          </AnimatedCard>
         )}
 
         {/* Weekly Trends */}
+        <AnimatedCard>
         <Card>
           <CardHeader>
             <CardTitle>7-Day Trends</CardTitle>
@@ -457,7 +494,14 @@ export default function VitalsPage() {
           <CardContent>
             <div className="space-y-4">
               {mockHistoricalData.map((day, index) => (
-                <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50">
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  whileHover={{ x: 5 }}
+                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50"
+                >
                   <div className="w-20 text-sm text-muted-foreground">
                     {new Date(day.date).toLocaleDateString('en-US', {
                       weekday: 'short',
@@ -487,11 +531,12 @@ export default function VitalsPage() {
                       <span className="font-medium">{day.oxygenSaturation.toFixed(0)}%</span>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </CardContent>
         </Card>
+        </AnimatedCard>
       </div>
     </div>
   );
