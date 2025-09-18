@@ -1,13 +1,21 @@
 import { InfoIcon, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
+
 
 export function DemoDisclaimer() {
+  const demoBanner = localStorage.getItem(LOCAL_STORAGE_KEYS.DEMO_BANNER);
+  const projectBanner = localStorage.getItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER);
   const [isVisible, setIsVisible] = useState({
-    demoBanner: true,
-    projectBanner: true,
+    demoBanner: demoBanner ? demoBanner === 'true' : true,
+    projectBanner: projectBanner ? projectBanner === 'true' : true,
   });
 
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, isVisible.demoBanner.toString());
+    localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, isVisible.projectBanner.toString());
+  }, [isVisible]);
 
   if (!isVisible.demoBanner && !isVisible.projectBanner) return null;
 

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthState, getAuthState, saveAuthState, clearAuthState, validateCredentials } from '../lib/auth';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface AuthContextType {
   authState: AuthState;
@@ -21,6 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedAuth = getAuthState();
     setAuthState(storedAuth);
     setIsLoading(false);
+
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
+      localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+    });
+    return () => {
+      window.removeEventListener('beforeunload', () => {
+        localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
+        localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+      });
+    }
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
