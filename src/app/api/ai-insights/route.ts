@@ -28,6 +28,28 @@ export async function POST(request: NextRequest) {
         - Include what it means, why it happens, and reassure them about the treatment process. Use markdown formatting.
         - Keep the explanation clear, compassionate, and under 400 words.
         - Use markdown formatting.
+
+        # Requirements
+        - Always use markdown formatting.
+        - Always take a compassionate, reassuring tone.
+        - Always use simple, easy to understand language.
+        - Take into account the patient's age, gender, and any other relevant information if provided.
+
+        # Output Format:
+          # Understanding ${context.diagnosis}
+            ## What is ${context.diagnosis}?
+              - An explanation of the diagnosis.
+            ## Why Does It Happen?
+              - An explanation of why the diagnosis happens.
+            ## What Can Be Done?
+              - An explanation of what the care team will likely do to treat the diagnosis.
+              - An explanation of what to expect during the treatment process.
+            ## Recovery Outlook
+              - An explanation of the likely recovery outlook for the diagnosis.
+              - Ensure you take a compassionate, reassuring tone.
+              - Reassure the patient that the care team is doing everything they can to help them recover and if the diagnosis is serious, that they are in good hands.
+            ## Questions to Ask the Care Team
+              - A list of questions that the paitent could ask the care team to help them understand the diagnosis and treatment process.
         `;
         break;
 

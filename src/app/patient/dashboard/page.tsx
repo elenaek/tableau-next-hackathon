@@ -26,6 +26,8 @@ import TableauDashboard from '@/components/TableauDashboard';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { LoadingInsight } from '@/components/LoadingInsight';
+import { AIDisclaimer } from '@/components/AIDisclaimer';
+import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 
 interface PatientData {
   id: string;
@@ -428,9 +430,11 @@ export default function PatientDashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+    <div>
+      <DemoDisclaimer />
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Patient Dashboard</h1>
           <p className="text-muted-foreground">Your healthcare journey at a glance</p>
@@ -529,21 +533,25 @@ export default function PatientDashboard() {
               {loadingInsightType === 'treatment-progress' ? (
                 <LoadingInsight message="Analyzing your recovery progress" />
               ) : progressInsight ? (
-                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                  <Markdown remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                      li: ({ children }) => <li className="mb-1">{children}</li>,
-                    }}
-                  >{progressInsight.insight}</Markdown>
-                  {/* <p className="text-sm">{progressInsight.insight}</p> */}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
-                  </p>
+                <div>
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <Markdown remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                        h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                        h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                        p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                        ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                        ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                      }}
+                    >{progressInsight.insight}</Markdown>
+                    {/* <p className="text-sm">{progressInsight.insight}</p> */}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                  <AIDisclaimer />
                 </div>
               ) : (
                 <Button
@@ -587,28 +595,32 @@ export default function PatientDashboard() {
               {loadingInsightType === 'diagnosis-explainer' ? (
                 <LoadingInsight message="Understanding your diagnosis" />
               ) : diagnosisInsight ? (
-                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <Markdown remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                      li: ({ children }) => <li className="mb-1">{children}</li>,
-                    }}
-                  >
-                    {diagnosisInsight.insight}</Markdown>
-                  {/* <p className="text-sm">{diagnosisInsight.insight}</p> */}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Generated at {new Date(diagnosisInsight.timestamp).toLocaleTimeString()}
-                  </p>
+                <div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <Markdown remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                        h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                        h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                        p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                        ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                        ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                      }}
+                    >
+                      {diagnosisInsight.insight}</Markdown>
+                    {/* <p className="text-sm">{diagnosisInsight.insight}</p> */}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Generated at {new Date(diagnosisInsight.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                  <AIDisclaimer />
                 </div>
               ) : (
                 <Button
                   onClick={() => generateInsight('diagnosis-explainer')}
                   disabled={loadingInsightType !== null}
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 active:scale-98"
                 >
                   <Brain className="w-4 h-4 mr-2" />
                   Explain My Diagnosis
@@ -662,6 +674,7 @@ export default function PatientDashboard() {
                       h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
                       p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
                       ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                      ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
                       li: ({ children }) => <li className="mb-1">{children}</li>,
                     }}
                   >{departmentInsight.insight}</Markdown>
@@ -703,6 +716,7 @@ export default function PatientDashboard() {
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   };
 
   const navItems = [
-    { href: '/patient/dashboard', icon: Home, label: 'Dashboard', tooltip: 'Dashboard' },
+    { href: '/', icon: Home, label: 'Dashboard', tooltip: 'Dashboard' },
     { href: '/patient/records', icon: FileText, label: 'Medical Records', tooltip: 'Medical Records' },
     { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' },
     { href: '/patient/messages', icon: MessageSquare, label: 'Messages', tooltip: 'Messages' },
