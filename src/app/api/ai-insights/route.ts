@@ -19,9 +19,16 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case 'diagnosis-explainer':
-        prompt = `Explain the following diagnosis to a patient in simple, encouraging terms: ${context.diagnosis}.
-                  Include what it means, why it happens, and reassure them about the treatment process.
-                  Keep the explanation clear, compassionate, and under 200 words.`;
+        prompt = `# Context
+        - You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.
+        - A patient is in the hospital for the following diagnosis: ${context.diagnosis}.
+
+        # Your Task
+        - Explain the following diagnosis to a patient in simple, encouraging terms: ${context.diagnosis}.
+        - Include what it means, why it happens, and reassure them about the treatment process. Use markdown formatting.
+        - Keep the explanation clear, compassionate, and under 400 words.
+        - Use markdown formatting.
+        `;
         break;
 
       case 'treatment-progress':

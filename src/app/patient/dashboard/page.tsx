@@ -23,6 +23,8 @@ import {
   Users
 } from 'lucide-react';
 import TableauDashboard from '@/components/TableauDashboard';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface PatientData {
   id: string;
@@ -538,7 +540,15 @@ export default function PatientDashboard() {
 
               {diagnosisInsight ? (
                 <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <p className="text-sm">{diagnosisInsight.insight}</p>
+                  <Markdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
+                  >
+                    {diagnosisInsight.insight}</Markdown>
+                  {/* <p className="text-sm">{diagnosisInsight.insight}</p> */}
                   <p className="text-xs text-muted-foreground mt-2">
                     Generated at {new Date(diagnosisInsight.timestamp).toLocaleTimeString()}
                   </p>
@@ -592,7 +602,14 @@ export default function PatientDashboard() {
 
               {departmentInsight ? (
                 <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                  <p className="text-sm">{departmentInsight.insight}</p>
+                  <Markdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
+                  >{departmentInsight.insight}</Markdown>
+                  {/* <p className="text-sm">{departmentInsight.insight}</p> */}
                   <p className="text-xs text-muted-foreground mt-2">
                     Generated at {new Date(departmentInsight.timestamp).toLocaleTimeString()}
                   </p>
@@ -623,7 +640,14 @@ export default function PatientDashboard() {
             <CardContent>
               {progressInsight ? (
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                  <p className="text-sm">{progressInsight.insight}</p>
+                  <Markdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
+                  >{progressInsight.insight}</Markdown>
+                  {/* <p className="text-sm">{progressInsight.insight}</p> */}
                   <p className="text-xs text-muted-foreground mt-2">
                     Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
                   </p>
