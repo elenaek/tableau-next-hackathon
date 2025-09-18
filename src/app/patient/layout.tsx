@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -13,7 +12,6 @@ import {
   LogOut,
   MessageSquare,
   Settings,
-  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/app/context/AuthContext';
@@ -35,11 +33,9 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
 
   const navItems = [
     { href: '/patient/dashboard', icon: Home, label: 'Dashboard', tooltip: 'Dashboard' },
-    { href: '/patient/appointments', icon: Calendar, label: 'Appointments', tooltip: 'Appointments' },
     { href: '/patient/records', icon: FileText, label: 'Medical Records', tooltip: 'Medical Records' },
     { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' },
     { href: '/patient/messages', icon: MessageSquare, label: 'Messages', tooltip: 'Messages' },
-    { href: '/patient/profile', icon: User, label: 'Profile', tooltip: 'Profile' },
   ];
 
   return (

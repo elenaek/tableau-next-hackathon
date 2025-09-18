@@ -49,7 +49,7 @@ interface AIInsight {
 const NotesPopover = ({ title, notes }: { title: string; notes: string }) => (
   <Popover>
     <PopoverTrigger asChild>
-      <Button variant="link" size="sm" className="h-auto p-0 text-sm underline">
+      <Button variant="link" size="sm" className="h-auto p-0 text-sm underline cursor-pointer">
         View Notes
       </Button>
     </PopoverTrigger>
@@ -72,6 +72,7 @@ const ExpandableProgressStep = ({
   isActive: boolean;
   isCompleted: boolean;
   subSteps?: Array<{ task: string; status: 'completed' | 'pending' | 'in-progress'; time?: string }>;
+  className?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(isActive);
 
@@ -97,7 +98,7 @@ const ExpandableProgressStep = ({
       <CollapsibleTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full justify-start p-2 h-auto hover:bg-muted/50"
+          className="w-full justify-start p-2 h-auto hover:bg-muted/100 cursor-pointer"
           disabled={subSteps.length === 0}
         >
           <div className="flex items-center space-x-3 w-full">
@@ -222,7 +223,7 @@ const PhysicianSection = () => {
             variant="ghost"
             size="sm"
             onClick={() => setExpandedConsults(!expandedConsults)}
-            className="text-xs h-auto p-1"
+            className="text-xs h-auto p-1 cursor-pointer"
           >
             {expandedConsults ? 'Show Less' : 'Show All'}
           </Button>
@@ -434,7 +435,7 @@ export default function PatientDashboard() {
           <h1 className="text-3xl font-bold">Patient Dashboard</h1>
           <p className="text-muted-foreground">Your healthcare journey at a glance</p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
+        <Badge variant="outline" className="text-sm px-2 py-1">
           <Clock className="w-4 h-4 mr-2" />
           Last updated: {new Date().toLocaleTimeString()}
         </Badge>
@@ -482,6 +483,21 @@ export default function PatientDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Treatment Progress and Physicians */}
         <div className="space-y-6">
+
+          {/* Physicians and Consults */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Stethoscope className="w-5 h-5" />
+                Your Care Team
+              </CardTitle>
+              <CardDescription>Physicians managing your care</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PhysicianSection />
+            </CardContent>
+          </Card>
+          
           {/* Treatment Progress */}
           <Card>
             <CardHeader>
@@ -500,17 +516,46 @@ export default function PatientDashboard() {
             </CardContent>
           </Card>
 
-          {/* Physicians and Consults */}
+          {/* Treatment Progress Insight */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Stethoscope className="w-5 h-5" />
-                Your Care Team
+                <Activity className="w-5 h-5" />
+                Progress Insights
               </CardTitle>
-              <CardDescription>Physicians managing your care</CardDescription>
+              <CardDescription>AI-powered analysis of your recovery</CardDescription>
             </CardHeader>
             <CardContent>
-              <PhysicianSection />
+              {loadingInsightType === 'treatment-progress' ? (
+                <LoadingInsight message="Analyzing your recovery progress" />
+              ) : progressInsight ? (
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <Markdown remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                    }}
+                  >{progressInsight.insight}</Markdown>
+                  {/* <p className="text-sm">{progressInsight.insight}</p> */}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
+                  </p>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => generateInsight('treatment-progress')}
+                  disabled={loadingInsightType !== null}
+                  variant="outline"
+                  className="w-full cursor-pointer"
+                >
+                  <Activity className="w-4 h-4 mr-2" />
+                  Get Progress Update
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -563,7 +608,7 @@ export default function PatientDashboard() {
                 <Button
                   onClick={() => generateInsight('diagnosis-explainer')}
                   disabled={loadingInsightType !== null}
-                  className="w-full"
+                  className="w-full cursor-pointer"
                 >
                   <Brain className="w-4 h-4 mr-2" />
                   Explain My Diagnosis
@@ -630,53 +675,10 @@ export default function PatientDashboard() {
                   onClick={() => generateInsight('department-busyness')}
                   disabled={loadingInsightType !== null}
                   variant="outline"
-                  className="w-full"
+                  className="w-full cursor-pointer"
                 >
                   <Info className="w-4 h-4 mr-2" />
                   Explain Department Status
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Treatment Progress Insight */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Progress Insights
-              </CardTitle>
-              <CardDescription>AI-powered analysis of your recovery</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingInsightType === 'treatment-progress' ? (
-                <LoadingInsight message="Analyzing your recovery progress" />
-              ) : progressInsight ? (
-                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
-                  <Markdown remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                      li: ({ children }) => <li className="mb-1">{children}</li>,
-                    }}
-                  >{progressInsight.insight}</Markdown>
-                  {/* <p className="text-sm">{progressInsight.insight}</p> */}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
-                  </p>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => generateInsight('treatment-progress')}
-                  disabled={loadingInsightType !== null}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Activity className="w-4 h-4 mr-2" />
-                  Get Progress Update
                 </Button>
               )}
             </CardContent>
