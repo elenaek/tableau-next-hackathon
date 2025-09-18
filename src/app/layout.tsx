@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700', '900'],
   subsets: ["latin"],
+  variable: "--font-roboto",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  weight: ['400', '500', '600', '700'],
   subsets: ["latin"],
+  variable: "--font-roboto-mono",
 });
 
 export const metadata: Metadata = {
@@ -30,7 +32,7 @@ export default function RootLayout({
         <script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js" defer></script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${roboto.variable} ${robotoMono.variable} font-sans antialiased`}
       >
         <AuthProvider>
           {children}
