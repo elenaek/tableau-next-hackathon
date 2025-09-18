@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSalesforceClient();
+    // const client = getSalesforceClient();
 
     // Handle different actions
     switch (action) {

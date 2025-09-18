@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
     const client = getSalesforceClient();
 
     let prompt = '';
-    let aiContext = context || {};
 
     switch (type) {
       case 'diagnosis-explainer':
@@ -52,11 +51,14 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const aiResponse = await client.callAgentforceModel(prompt, aiContext);
+    const aiResponse = await client.callAgentforceModel(prompt);
+
+    console.log("AI Response", aiResponse);
 
     return NextResponse.json({
       type,
-      insight: aiResponse.choices?.[0]?.message?.content || 'Unable to generate insight at this time.',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      insight: (aiResponse as any)?.generation?.generatedText || 'Unable to generate insight at this time.',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

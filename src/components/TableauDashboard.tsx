@@ -21,20 +21,22 @@ export default function TableauDashboard({
   className = '',
 }: TableauDashboardProps) {
   const vizContainerRef = useRef<HTMLDivElement>(null);
-  const vizRef = useRef<any>(null);
+  const vizRef = useRef<unknown>(null);
 
   useEffect(() => {
     // Wait for the Tableau JS API to load
-    if (typeof window !== 'undefined' && (window as any).tableau) {
+    if (typeof window !== 'undefined' && (window as Window & { tableau?: unknown }).tableau) {
       initializeViz();
     }
 
     return () => {
       // Clean up on unmount
       if (vizRef.current) {
-        vizRef.current.dispose();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (vizRef.current as any).dispose();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   const initializeViz = () => {
@@ -52,7 +54,8 @@ export default function TableauDashboard({
 
     try {
       // Initialize Tableau Viz
-      vizRef.current = new (window as any).tableau.Viz(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      vizRef.current = new (window as Window & { tableau?: any }).tableau.Viz(
         vizContainerRef.current,
         url,
         options

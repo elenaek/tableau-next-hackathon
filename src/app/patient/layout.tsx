@@ -11,7 +11,6 @@ import {
   FileText,
   Home,
   LogOut,
-  Menu,
   MessageSquare,
   Settings,
   User

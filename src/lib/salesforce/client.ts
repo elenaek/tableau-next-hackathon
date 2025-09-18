@@ -25,6 +25,7 @@ export class SalesforceClient {
       apiVersion: 'v62.0',
       ...config,
     };
+    console.log(this.config);
   }
 
   private async authenticate(): Promise<void> {
@@ -47,6 +48,7 @@ export class SalesforceClient {
     }
 
     const data: SalesforceTokenResponse = await response.json();
+    console.log(data);
     this.accessToken = data.access_token;
     this.instanceUrl = data.instance_url;
     // Token expires in 2 hours, refresh after 1.5 hours
@@ -57,9 +59,10 @@ export class SalesforceClient {
     if (!this.accessToken || !this.tokenExpiry || Date.now() >= this.tokenExpiry) {
       await this.authenticate();
     }
+    console.log("Authenticating", this.accessToken, this.tokenExpiry, Date.now());
   }
 
-  async query(soql: string): Promise<any> {
+  async query(soql: string): Promise<unknown> {
     await this.ensureAuthenticated();
 
     const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/query?q=${encodeURIComponent(soql)}`;
@@ -78,7 +81,7 @@ export class SalesforceClient {
     return response.json();
   }
 
-  async getDataCloudData(endpoint: string): Promise<any> {
+  async getDataCloudData(endpoint: string): Promise<unknown> {
     await this.ensureAuthenticated();
 
     const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/datacloud/${endpoint}`;
@@ -97,32 +100,21 @@ export class SalesforceClient {
     return response.json();
   }
 
-  async callAgentforceModel(prompt: string, context?: any): Promise<any> {
+  async callAgentforceModel(prompt: string): Promise<unknown> {
     await this.ensureAuthenticated();
 
-    const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/einstein/llm/models/chat/completions`;
+    const url = `https://api.salesforce.com/einstein/platform/v1/models/sfdc_ai__DefaultGPT35Turbo/generations`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
+        'x-sfdc-app-context': 'EinsteinGPT',
+        'x-client-feature-id': 'ai-platform-models-connected-app'
       },
       body: JSON.stringify({
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        model: 'gpt-4o-mini',
-        max_tokens: 500,
-        temperature: 0.7,
-        ...context,
+        prompt: prompt
       }),
     });
 

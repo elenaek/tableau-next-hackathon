@@ -9,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import {
   Activity,
   Brain,
-  Calendar,
   CheckCircle,
   ChevronDown,
   ChevronRight,
@@ -18,7 +17,6 @@ import {
   Heart,
   Hospital,
   Info,
-  MapPin,
   Stethoscope,
   TrendingUp,
   User,
