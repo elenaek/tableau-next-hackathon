@@ -25,7 +25,6 @@ export class SalesforceClient {
       apiVersion: 'v62.0',
       ...config,
     };
-    console.log(this.config);
   }
 
   private async authenticate(): Promise<void> {
@@ -48,7 +47,6 @@ export class SalesforceClient {
     }
 
     const data: SalesforceTokenResponse = await response.json();
-    console.log(data);
     this.accessToken = data.access_token;
     this.instanceUrl = data.instance_url;
     // Token expires in 2 hours, refresh after 1.5 hours
@@ -59,7 +57,6 @@ export class SalesforceClient {
     if (!this.accessToken || !this.tokenExpiry || Date.now() >= this.tokenExpiry) {
       await this.authenticate();
     }
-    console.log("Authenticating", this.accessToken, this.tokenExpiry, Date.now());
   }
 
   async query(soql: string): Promise<unknown> {
