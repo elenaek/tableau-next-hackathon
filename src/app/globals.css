@@ -33,3 +33,12 @@ body {
 .font-mono {
   font-family: var(--font-roboto-mono), 'Roboto Mono', monospace;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animation-delay-0 { animation-delay: 0ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-400 { animation-delay: 400ms; }

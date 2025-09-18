@@ -25,6 +25,7 @@ import {
 import TableauDashboard from '@/components/TableauDashboard';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { LoadingInsight } from '@/components/LoadingInsight';
 
 interface PatientData {
   id: string;
@@ -268,7 +269,7 @@ export default function PatientDashboard() {
   const [progressInsight, setProgressInsight] = useState<AIInsight | null>(null);
   const [departmentInsight, setDepartmentInsight] = useState<AIInsight | null>(null);
   const [loading, setLoading] = useState(true);
-  const [insightLoading, setInsightLoading] = useState(false);
+  const [loadingInsightType, setLoadingInsightType] = useState<string | null>(null);
 
   const patientId = 'patient-123';
 
@@ -368,7 +369,7 @@ export default function PatientDashboard() {
   };
 
   const generateInsight = async (type: string) => {
-    setInsightLoading(true);
+    setLoadingInsightType(type);
     try {
       const context = {
         diagnosis: patientData?.diagnosis,
@@ -410,7 +411,7 @@ export default function PatientDashboard() {
     } catch (error) {
       console.error('Error generating insight:', error);
     } finally {
-      setInsightLoading(false);
+      setLoadingInsightType(null);
     }
   };
 
@@ -520,7 +521,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5 text-red-400" />
                 Current Diagnosis
               </CardTitle>
               <CardDescription>Understanding your condition</CardDescription>
@@ -538,10 +539,15 @@ export default function PatientDashboard() {
                 </div>
               </div>
 
-              {diagnosisInsight ? (
+              {loadingInsightType === 'diagnosis-explainer' ? (
+                <LoadingInsight message="Understanding your diagnosis" />
+              ) : diagnosisInsight ? (
                 <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                   <Markdown remarkPlugins={[remarkGfm]}
                     components={{
+                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
                       p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
                       ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
                       li: ({ children }) => <li className="mb-1">{children}</li>,
@@ -556,11 +562,11 @@ export default function PatientDashboard() {
               ) : (
                 <Button
                   onClick={() => generateInsight('diagnosis-explainer')}
-                  disabled={insightLoading}
+                  disabled={loadingInsightType !== null}
                   className="w-full"
                 >
                   <Brain className="w-4 h-4 mr-2" />
-                  {insightLoading ? 'Generating...' : 'Explain My Diagnosis'}
+                  Explain My Diagnosis
                 </Button>
               )}
             </CardContent>
@@ -600,10 +606,15 @@ export default function PatientDashboard() {
                 </div>
               </div>
 
-              {departmentInsight ? (
+              {loadingInsightType === 'department-busyness' ? (
+                <LoadingInsight message="Checking department status" />
+              ) : departmentInsight ? (
                 <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
                   <Markdown remarkPlugins={[remarkGfm]}
                     components={{
+                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
                       p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
                       ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
                       li: ({ children }) => <li className="mb-1">{children}</li>,
@@ -617,12 +628,12 @@ export default function PatientDashboard() {
               ) : (
                 <Button
                   onClick={() => generateInsight('department-busyness')}
-                  disabled={insightLoading}
+                  disabled={loadingInsightType !== null}
                   variant="outline"
                   className="w-full"
                 >
                   <Info className="w-4 h-4 mr-2" />
-                  {insightLoading ? 'Generating...' : 'Explain Department Status'}
+                  Explain Department Status
                 </Button>
               )}
             </CardContent>
@@ -638,10 +649,15 @@ export default function PatientDashboard() {
               <CardDescription>AI-powered analysis of your recovery</CardDescription>
             </CardHeader>
             <CardContent>
-              {progressInsight ? (
+              {loadingInsightType === 'treatment-progress' ? (
+                <LoadingInsight message="Analyzing your recovery progress" />
+              ) : progressInsight ? (
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
                   <Markdown remarkPlugins={[remarkGfm]}
                     components={{
+                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
                       p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
                       ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
                       li: ({ children }) => <li className="mb-1">{children}</li>,
@@ -655,12 +671,12 @@ export default function PatientDashboard() {
               ) : (
                 <Button
                   onClick={() => generateInsight('treatment-progress')}
-                  disabled={insightLoading}
+                  disabled={loadingInsightType !== null}
                   variant="outline"
                   className="w-full"
                 >
                   <Activity className="w-4 h-4 mr-2" />
-                  {insightLoading ? 'Generating...' : 'Get Progress Update'}
+                  Get Progress Update
                 </Button>
               )}
             </CardContent>
