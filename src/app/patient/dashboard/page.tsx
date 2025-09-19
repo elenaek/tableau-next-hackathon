@@ -29,9 +29,8 @@ import { LoadingInsight } from '@/components/LoadingInsight';
 import { AIDisclaimer } from '@/components/AIDisclaimer';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
-// import { TextGenerateEffect } from '@/components/ui/text-generate-effect';
 import { Sparkles } from '@/components/ui/sparkles';
-import { FloatingNotification } from '@/components/ui/floating-notification';
+// import { FloatingNotification } from '@/components/ui/floating-notification';
 
 interface PatientData {
   id: string;
@@ -277,8 +276,8 @@ export default function PatientDashboard() {
   const [departmentInsight, setDepartmentInsight] = useState<AIInsight | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingInsightType, setLoadingInsightType] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
+  const [_showNotification, setShowNotification] = useState(false);
+  const [_notificationMessage, setNotificationMessage] = useState('');
 
   const patientId = 'patient-123';
 
@@ -564,7 +563,9 @@ export default function PatientDashboard() {
                         ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
                         li: ({ children }) => <li className="mb-1">{children}</li>,
                       }}
-                    >{progressInsight.insight}</Markdown>
+                    >
+                      {progressInsight.insight}
+                    </Markdown>
                     {/* <p className="text-sm">{progressInsight.insight}</p> */}
                     <p className="text-xs text-muted-foreground mt-2">
                       Generated at {new Date(progressInsight.timestamp).toLocaleTimeString()}
@@ -743,14 +744,14 @@ export default function PatientDashboard() {
       </div>
 
       {/* Floating Notification */}
-      <FloatingNotification
+      {/* <FloatingNotification
         show={showNotification}
         onClose={() => setShowNotification(false)}
         title="AI Insight Generated"
         description={notificationMessage}
         type="success"
         duration={4000}
-      />
+      /> */}
     </div>
   );
 }

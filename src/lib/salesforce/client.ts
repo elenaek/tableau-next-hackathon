@@ -19,6 +19,7 @@ export class SalesforceClient {
   private accessToken: string | null = null;
   private instanceUrl: string | null = null;
   private tokenExpiry: number | null = null;
+  private refreshPromise: Promise<void> | null = null;
 
   constructor(config: SalesforceConfig) {
     this.config = {
@@ -28,6 +29,21 @@ export class SalesforceClient {
   }
 
   private async authenticate(): Promise<void> {
+    // Prevent concurrent refresh attempts
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.refreshPromise = this.performAuthentication();
+
+    try {
+      await this.refreshPromise;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  private async performAuthentication(): Promise<void> {
     const params = new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: this.config.clientId,
@@ -43,6 +59,8 @@ export class SalesforceClient {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Salesforce authentication failed:', errorText);
       throw new Error(`Authentication failed: ${response.statusText}`);
     }
 
@@ -51,6 +69,7 @@ export class SalesforceClient {
     this.instanceUrl = data.instance_url;
     // Token expires in 2 hours, refresh after 1.5 hours
     this.tokenExpiry = Date.now() + 90 * 60 * 1000;
+    console.log('Salesforce token refreshed successfully, expires at:', new Date(this.tokenExpiry).toISOString());
   }
 
   private async ensureAuthenticated(): Promise<void> {
@@ -59,19 +78,53 @@ export class SalesforceClient {
     }
   }
 
+  private async makeAuthenticatedRequest(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
+    await this.ensureAuthenticated();
+
+    const headers = {
+      'Authorization': `Bearer ${this.accessToken}`,
+      'Accept': 'application/json',
+      ...options.headers,
+    };
+
+    let response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    // If we get a 401, token might be expired, try refreshing once
+    if (response.status === 401) {
+      console.log('Received 401, refreshing token and retrying...');
+      this.accessToken = null; // Force refresh
+      this.tokenExpiry = null;
+      await this.authenticate();
+
+      // Retry the request with new token
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          ...headers,
+          'Authorization': `Bearer ${this.accessToken}`,
+        },
+      });
+    }
+
+    return response;
+  }
+
   async query(soql: string): Promise<unknown> {
     await this.ensureAuthenticated();
 
     const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/query?q=${encodeURIComponent(soql)}`;
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Accept': 'application/json',
-      },
-    });
+    const response = await this.makeAuthenticatedRequest(url);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Salesforce query failed:', errorText);
       throw new Error(`Query failed: ${response.statusText}`);
     }
 
@@ -83,14 +136,11 @@ export class SalesforceClient {
 
     const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/datacloud/${endpoint}`;
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Accept': 'application/json',
-      },
-    });
+    const response = await this.makeAuthenticatedRequest(url);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Data Cloud request failed:', errorText);
       throw new Error(`Data Cloud request failed: ${response.statusText}`);
     }
 
@@ -98,14 +148,11 @@ export class SalesforceClient {
   }
 
   async callAgentforceModel(prompt: string): Promise<unknown> {
-    await this.ensureAuthenticated();
-
     const url = `https://api.salesforce.com/einstein/platform/v1/models/sfdc_ai__DefaultGPT35Turbo/generations`;
 
-    const response = await fetch(url, {
+    const response = await this.makeAuthenticatedRequest(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
         'Content-Type': 'application/json',
         'x-sfdc-app-context': 'EinsteinGPT',
         'x-client-feature-id': 'ai-platform-models-connected-app'
@@ -116,6 +163,8 @@ export class SalesforceClient {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Agentforce Model API failed:', errorText);
       throw new Error(`Agentforce Model API failed: ${response.statusText}`);
     }
 
