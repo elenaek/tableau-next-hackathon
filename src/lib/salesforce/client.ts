@@ -118,9 +118,15 @@ export class SalesforceClient {
   async query(soql: string): Promise<unknown> {
     await this.ensureAuthenticated();
 
-    const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/query?q=${encodeURIComponent(soql)}`;
+    const url = `${this.instanceUrl}/services/data/${this.config.apiVersion}/ssot/queryv2`;
 
-    const response = await this.makeAuthenticatedRequest(url);
+    const response = await this.makeAuthenticatedRequest(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sql: soql }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

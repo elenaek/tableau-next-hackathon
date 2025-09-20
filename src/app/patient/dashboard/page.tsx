@@ -32,10 +32,38 @@ import { AnimatedCard } from '@/components/ui/animated-card';
 import { Sparkles } from '@/components/ui/sparkles';
 // import { FloatingNotification } from '@/components/ui/floating-notification';
 
+interface ProviderNote {
+  department: string;
+  provider: string;
+  notes: string;
+}
+
+interface TreatmentProgressItem {
+  node_label: string;
+  completed: boolean;
+  timestamp: string;
+}
+
+interface TreatmentProgressStep {
+  isCompleted?: boolean;
+  items: TreatmentProgressItem[];
+}
+
+interface ProgressStep {
+  step: string;
+  isCompleted: boolean;
+  isActive: boolean;
+  subSteps: {
+    task: string;
+    status: 'completed' | 'pending' | 'in-progress';
+    time?: string;
+  }[];
+}
+
 interface PatientData {
   id: string;
   name: string;
-  dateOfBirth: string;
+  age: string;
   medicalRecordNumber: string;
   diagnosis: string;
   admissionDate: string;
@@ -43,6 +71,9 @@ interface PatientData {
   physician: string;
   roomNumber: string;
   treatmentStatus: string;
+  treatmentProgress?: ProgressStep[];
+  providerNotes?: string | ProviderNote[];
+  isMock: boolean;
 }
 
 interface AIInsight {
@@ -66,6 +97,11 @@ const NotesPopover = ({ title, notes }: { title: string; notes: string }) => (
     </PopoverContent>
   </Popover>
 );
+
+function decodeHtmlEntities(htmlString: string) {
+  const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+  return doc.documentElement.textContent;
+}
 
 const ExpandableProgressStep = ({
   step,
@@ -149,7 +185,7 @@ const ExpandableProgressStep = ({
   );
 };
 
-const PhysicianSection = () => {
+const PhysicianSection = ({ patientData }: { patientData: PatientData | null }) => {
   const [expandedConsults, setExpandedConsults] = useState(false);
 
   const roundingPhysician = {
@@ -158,7 +194,7 @@ const PhysicianSection = () => {
     notes: "Patient showing good progress with treatment. Vitals stable. Continue current medication regimen. Monitor for any signs of complications. Next rounds scheduled for tomorrow morning."
   };
 
-  const consults = [
+  let consults = [
     {
       id: "pulmo",
       department: "Pulmonology",
@@ -184,6 +220,26 @@ const PhysicianSection = () => {
       notes: "Reviewed dietary requirements during recovery. Provided meal plan to support immune system. Patient education completed."
     }
   ];
+
+  if(patientData?.providerNotes && typeof patientData.providerNotes === 'string'){
+    try {
+      const decodedString = decodeHtmlEntities(patientData.providerNotes);
+      const jsonString = decodedString?.replace(/'/g, '"');
+
+      const parsedArray = JSON.parse(jsonString || '[]');
+      
+      consults = parsedArray.map((item: ProviderNote) => ({
+        id: `${item.department}-${item.provider}`,
+        department: item.department,
+        physician: item.provider,
+        status: ['active', 'pending', 'completed'][Math.floor(Math.random() * 3)],
+        lastUpdate: new Date().toLocaleString(),
+        notes: item.notes
+      }));
+    } catch (error) {
+      console.error('Error parsing provider notes:', error);
+    }
+  }
 
   const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
@@ -276,12 +332,13 @@ export default function PatientDashboard() {
   const [departmentInsight, setDepartmentInsight] = useState<AIInsight | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingInsightType, setLoadingInsightType] = useState<string | null>(null);
-  const [_showNotification, setShowNotification] = useState(false);
-  const [_notificationMessage, setNotificationMessage] = useState('');
+  const [, setShowNotification] = useState(false);
+  const [, setNotificationMessage] = useState('');
 
-  const patientId = 'patient-123';
+  const patientId = 'P8045221';
+  // const patientId = 'patient-123';
 
-  const progressSteps = [
+  const progressSteps: ProgressStep[] = [
     {
       step: "Admission",
       isCompleted: true,
@@ -353,22 +410,92 @@ export default function PatientDashboard() {
     fetchPatientData();
   }, []);
 
+
   const fetchPatientData = async () => {
     try {
       const mockData: PatientData = {
         id: patientId,
         name: 'John Doe',
-        dateOfBirth: '1980-05-15',
+        age: '25',
         medicalRecordNumber: 'MRN-2024-001',
         diagnosis: 'Acute Bronchitis',
         admissionDate: '2024-01-15',
         department: 'Respiratory Care',
         physician: 'Dr. Sarah Johnson',
         roomNumber: '302-A',
-        treatmentStatus: 'In Progress'
+        treatmentStatus: 'In Progress',
+        isMock: true
       };
 
-      setPatientData(mockData);
+      const patientData = await fetch(`/api/patient`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId,
+          sql: `SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'`
+        })
+      });
+
+      const fieldConversion: Record<string, string> = {
+        patient_id__c: 'id',
+        patient_name__c: 'name',
+        patient_mrn__c: 'medicalRecordNumber',
+        diagnosis__c: 'diagnosis',
+        patient_age__c: 'age',
+        room_number__c: 'roomNumber',
+        department__c: 'department',
+        admission_date__c: 'admissionDate',
+        status__c: 'treatmentStatus',
+        physician__c: 'physician',
+        provider_notes__c: 'providerNotes',
+        patient_treatment_progress__c: 'treatmentProgress'
+      }
+
+      const treatmentProgressStepConversion = {
+        admission: 'Admission',
+        initial_assessment: 'Initial Assessment',
+        treatment: 'Treatment',
+        recovery: 'Recovery',
+        discharge_planning: 'Discharge Planning',
+        discharge: 'Discharge'
+      }
+
+      const res = await patientData.json();
+      const mappedData: Partial<PatientData> = {
+        isMock: false
+      };
+      Object.keys(res?.metadata).forEach((field: string, index: number) => {
+        if(field === "patient_treatment_progress__c") {
+          const decodedTreatmentProgress = decodeHtmlEntities(res?.data[0][index]);
+          const jsonTreatmentProgress = decodedTreatmentProgress?.replace(/'/g, '"');
+          const parsedTreatmentProgress: Record<string, TreatmentProgressItem[] | TreatmentProgressStep> = JSON.parse(jsonTreatmentProgress || '{}');
+          const treatmentProgress: ProgressStep[] = [];
+          Object.keys(parsedTreatmentProgress).forEach((key: string) => {
+            const progressData = parsedTreatmentProgress[key];
+            const items = Array.isArray(progressData) ? progressData : progressData.items || [];
+            
+            treatmentProgress.push({
+              step: treatmentProgressStepConversion[key as keyof typeof treatmentProgressStepConversion],
+              isCompleted: items.filter((item) => !item.completed).length === 0,
+              isActive: false,
+              subSteps: items.map((item: TreatmentProgressItem) => ({
+                task: item.node_label,
+                status: item.completed === true ? 'completed' : 'pending',
+                time: item.timestamp ? new Date(Date.parse(item.timestamp)).toLocaleString() : ''
+              }))
+            })
+          })
+          mappedData[fieldConversion[field] as keyof PatientData] = treatmentProgress as never;
+        } 
+        else if(field === fieldConversion.provider_notes__c) {
+          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index].map((item: string) => JSON.parse(item));
+        }
+        else {
+          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
+        }
+      });
+
+      setPatientData(Object.keys(mappedData)?.length > 0 ? mappedData as PatientData : mockData);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching patient data:', error);
@@ -476,12 +603,12 @@ export default function PatientDashboard() {
                 <p className="font-medium">{patientData?.medicalRecordNumber}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Date of Birth</p>
-                <p className="font-medium">{new Date(patientData?.dateOfBirth || '').toLocaleDateString()}</p>
+                <p className="text-sm text-muted-foreground">Age</p>
+                <p className="font-medium">{Math.round(Number(patientData?.age))}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Room Number</p>
-                <p className="font-medium">{patientData?.roomNumber}</p>
+                <p className="font-medium">{Math.round(Number(patientData?.roomNumber))}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Department</p>
@@ -512,7 +639,7 @@ export default function PatientDashboard() {
               <CardDescription>Physicians managing your care</CardDescription>
             </CardHeader>
             <CardContent>
-              <PhysicianSection />
+              <PhysicianSection patientData={patientData} />
             </CardContent>
           </Card>
           </AnimatedCard>
@@ -529,9 +656,18 @@ export default function PatientDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {progressSteps.map((item, index) => (
-                  <ExpandableProgressStep key={index} {...item} />
-                ))}
+                {(() => {
+                  if(patientData?.treatmentProgress && patientData.treatmentProgress.length > 0){
+                    return patientData.treatmentProgress.map((item, index) => {
+                      return <ExpandableProgressStep key={index} {...item} />
+                    })
+                  }else{
+                    return progressSteps.map((item, index) => (
+                      <ExpandableProgressStep key={index} {...item} />
+                    ))
+                  }
+                })()
+                }
               </div>
             </CardContent>
           </Card>
@@ -552,7 +688,7 @@ export default function PatientDashboard() {
                 <LoadingInsight message="Analyzing your recovery progress" />
               ) : progressInsight ? (
                 <div>
-                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="p-4 bg-green-50 rounded-lg">
                     <Markdown remarkPlugins={[remarkGfm]}
                       components={{
                         h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
@@ -578,7 +714,7 @@ export default function PatientDashboard() {
                   onClick={() => generateInsight('treatment-progress')}
                   disabled={loadingInsightType !== null}
                   variant="outline"
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer bg-gradient-to-r from-pink-100 to-pink-200 hover:from-pink-200 hover:to-pink-300 active:scale-98"
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   Get Progress Update

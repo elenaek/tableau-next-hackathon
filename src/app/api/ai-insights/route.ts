@@ -54,13 +54,19 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'treatment-progress':
-        prompt = `Based on the following treatment information, provide an encouraging update on the patient's progress:
-                  Admission Date: ${context.admissionDate}
-                  Current Status: ${context.status}
-                  Treatment Plan: ${context.treatmentPlan}
-                  Recent Vitals: ${context.vitals}
+        prompt = `
+        # Context
+        - You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.
+        - A patient is in the hospital for the following diagnosis: ${context.diagnosis} and in need of assurance, support and explanation.
 
-                  Provide a brief, positive assessment of their progress and what to expect next.`;
+        # Your Task
+        - Provide an encouraging update on the patient's progress:
+            Admission Date: ${context.admissionDate}
+            Current Status: ${context.status}
+            Treatment Plan: ${context.treatmentPlan}
+            Recent Vitals: ${context.vitals}
+
+            Provide a brief, positive assessment of their progress and what to expect next. Use Markdown formatting.`;
         break;
 
       case 'department-busyness':
