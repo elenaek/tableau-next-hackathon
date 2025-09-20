@@ -281,7 +281,7 @@ export function AgentforceChat() {
                                 "text-xs mt-1",
                                 message.role === 'user' ? "text-blue-100" : "text-muted-foreground"
                               )}>
-                                {new Date(message.timestamp).toLocaleTimeString()}
+                                {new Date(message.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
                             {message.role === 'user' && (
