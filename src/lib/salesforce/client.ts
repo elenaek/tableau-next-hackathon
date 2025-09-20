@@ -176,4 +176,31 @@ export class SalesforceClient {
 
     return response.json();
   }
+
+  async generateChat(messages: Array<{ role: string; content: string }>): Promise<unknown> {
+    await this.ensureAuthenticated();
+
+    const modelName = process.env.SALESFORCE_AI_INSIGHTS_MODEL || 'sfdc_ai__DefaultGPT35Turbo';
+    const url = `https://api.salesforce.com/einstein/platform/v1/models/${modelName}/chat-generations`;
+
+    const response = await this.makeAuthenticatedRequest(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-sfdc-app-context': 'EinsteinGPT',
+        'x-client-feature-id': 'ai-platform-models-connected-app'
+      },
+      body: JSON.stringify({
+        messages: messages
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Salesforce generateChat API failed:', errorText);
+      throw new Error(`Salesforce generateChat API failed: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
 }

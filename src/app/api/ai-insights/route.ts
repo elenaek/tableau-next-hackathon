@@ -204,6 +204,7 @@ export async function POST(request: NextRequest) {
         Remember: You are here to help the patient understand their care better, not to provide medical advice or diagnoses.`;
         break;
 
+
       default:
         return NextResponse.json(
           { error: 'Invalid insight type' },
@@ -212,7 +213,6 @@ export async function POST(request: NextRequest) {
     }
 
     const aiResponse = await client.callAgentforceModel(prompt);
-
 
     return NextResponse.json({
       type,

@@ -13,10 +13,13 @@ import {
   Send,
   Bot,
   User,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/app/context/ChatContext';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export function AgentforceChat() {
   const {
@@ -35,6 +38,7 @@ export function AgentforceChat() {
     setInput,
     isLoading,
     sendMessage,
+    clearMessages,
     savePositionAndSize
   } = useChat();
 
@@ -57,7 +61,7 @@ export function AgentforceChat() {
     if (scrollAreaRef.current && isOpen && !isMinimized) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isMinimized]);
 
   // Auto-focus input when chat is opened
   useEffect(() => {
@@ -151,7 +155,7 @@ export function AgentforceChat() {
             initial={{ x: 100 }}
             animate={{ x: 0 }}
             exit={{ x: 100 }}
-            className="fixed top-1/16 z-50"
+            className="fixed top-1/8 z-50"
             style={{ right: '15px' }}
           >
             <Button
@@ -196,12 +200,24 @@ export function AgentforceChat() {
             <AnimatedChatCard className="w-full h-full p-[1px]">
               <Card className="w-full h-full flex flex-col border relative rounded-xl">
                 {/* Header */}
-                <div className="drag-handle flex items-center justify-between p-3 border-b cursor-move bg-gradient-to-r from-pink-50 to-indigo-50 rounded-t-xl">
+                <div className={cn(
+                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-pink-50 to-indigo-50",
+                  isMinimized ? "rounded-xl border" : "rounded-t-xl border-b"
+                )}>
                   <div className="flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-pink-400" />
+                    <Bot className="h-5 w-5 text-pink-400"/>
                     <h3 className="font-semibold text-sm">Agentforce Health Assistant</h3>
                   </div>
                   <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 cursor-pointer hover:scale-110 active:scale-95"
+                      onClick={clearMessages}
+                      title="Clear chat"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -247,7 +263,19 @@ export function AgentforceChat() {
                                   : "bg-indigo-100 text-foreground"
                               )}
                             >
-                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                              <Markdown remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                                    h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                                    h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                                    p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                                    ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                                    ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                                  }}
+                              >
+                                {message.content}
+                              </Markdown>
                               <p className={cn(
                                 "text-xs mt-1",
                                 message.role === 'user' ? "text-blue-100" : "text-muted-foreground"
@@ -256,7 +284,7 @@ export function AgentforceChat() {
                               </p>
                             </div>
                             {message.role === 'user' && (
-                              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                                 <User className="h-4 w-4 text-green-600" />
                               </div>
                             )}
@@ -267,7 +295,7 @@ export function AgentforceChat() {
                             <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
                               <Bot className="h-4 w-4 text-pink-300" />
                             </div>
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <div className="bg-gray-100 rounded-lg px-4 py-2">
                               <Loader2 className="h-4 w-4 animate-spin" />
                             </div>
                           </div>
@@ -301,7 +329,7 @@ export function AgentforceChat() {
                           onClick={sendMessage}
                           disabled={isLoading || !input.trim()}
                           size="sm"
-                          className="px-3 self-end"
+                          className="px-3 self-end cursor-pointer hover:scale-110 active:scale-95"
                         >
                           <Send className="h-4 w-4" />
                         </Button>

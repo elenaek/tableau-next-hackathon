@@ -463,6 +463,7 @@ export default function PatientDashboard() {
         else {
           mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
         }
+        mappedData["lengthOfStay"] = Math.floor((new Date().getTime() - new Date(Date.parse(mappedData[fieldConversion.admission_date__c as keyof PatientData] as string)).getTime()) / (1000 * 60 * 60 * 24)) + 1;
       });
 
       const finalData = Object.keys(mappedData)?.length > 0 ? mappedData as PatientData : mockData;
@@ -840,7 +841,7 @@ export default function PatientDashboard() {
                     {patientData?.treatmentStatus}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    Day {patientData?.lengthOfStay?.toString().replace(" days", "")} of treatment
+                    Day {patientData?.lengthOfStay} of treatment
                   </span>
                 </div>
               </div>
@@ -922,23 +923,26 @@ export default function PatientDashboard() {
                 {loadingInsightType === 'department-busyness' ? (
                   <LoadingInsight message="Checking department status" />
                 ) : departmentInsight ? (
-                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                    <Markdown remarkPlugins={[remarkGfm]}
-                      components={{
-                        h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                        h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                        h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                        p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                        ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                        ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
-                        li: ({ children }) => <li className="mb-1">{children}</li>,
-                      }}
-                    >{departmentInsight.insight}</Markdown>
-                    {/* <p className="text-sm">{departmentInsight.insight}</p> */}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Generated at {new Date(departmentInsight.timestamp).toLocaleTimeString()}
-                    </p>
-                  </div>
+                  <>
+                    <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                      <Markdown remarkPlugins={[remarkGfm]}
+                        components={{
+                          h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                          h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                          h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                          p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                          ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                          ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                          li: ({ children }) => <li className="mb-1">{children}</li>,
+                        }}
+                      >{departmentInsight.insight}</Markdown>
+                      {/* <p className="text-sm">{departmentInsight.insight}</p> */}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Generated at {new Date(departmentInsight.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <AIDisclaimer />
+                  </>
                 ) : (
                   <Button
                     onClick={() => generateInsight('department-busyness')}

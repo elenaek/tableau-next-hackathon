@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface Message {
@@ -38,6 +38,7 @@ interface ChatContextType {
   isLoading: boolean;
   setIsLoading: (value: boolean) => void;
   sendMessage: () => Promise<void>;
+  clearMessages: () => void;
   savePositionAndSize: () => void;
 }
 
@@ -100,6 +101,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     if (typeof window !== 'undefined' && !savedState?.position) {
       setPosition({ x: window.innerWidth - 420, y: 100 });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Save position and size manually (called on mouse release)
@@ -139,7 +141,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
           diagnosis: patientData.diagnosis,
           department: patientData.department,
           treatmentStatus: patientData.treatmentStatus,
-          admissionDate: patientData.admissionDate
+          treatmentProgress: patientData.treatmentProgress,
+          providerNotes: patientData.providerNotes,
+          admissionDate: patientData.admissionDate,
+          lengthOfStay: patientData.lengthOfStay,
+          physician: patientData.physician,
+          roomNumber: patientData.roomNumber
         };
       }
     } catch (error) {
@@ -147,6 +154,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
     }
     return null;
   };
+
+  // Clear all messages and reset to initial state
+  const clearMessages = useCallback(() => {
+    setMessages([
+      {
+        id: '1',
+        content: "Hello! I'm your AI healthcare assistant. I can help you understand your medical records, treatment progress, and answer questions about your care. How can I assist you today?",
+        role: 'assistant',
+        timestamp: new Date()
+      }
+    ]);
+  }, []);
 
   // Send message to Agentforce
   const sendMessage = async () => {
@@ -166,19 +185,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
     try {
       const patientContext = getPatientContext();
 
-      const response = await fetch('/api/ai-insights', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: 'chat',
-          patientId: 'demo-patient',
-          context: {
-            message: input,
-            patientContext,
-            conversationHistory: messages.slice(-5) // Send last 5 messages for context
-          }
+          message: input,
+          patientContext,
+          conversationHistory: messages.slice(-5) // Send last 5 messages for context
         }),
       });
 
@@ -228,6 +243,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     isLoading,
     setIsLoading,
     sendMessage,
+    clearMessages,
     savePositionAndSize
   };
 
