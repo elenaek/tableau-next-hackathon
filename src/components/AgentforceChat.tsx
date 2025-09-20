@@ -161,7 +161,7 @@ export function AgentforceChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="cursor-pointer rounded-l-lg rounded-r-none h-32 px-3 py-1 bg-blue-700 hover:bg-blue-900 text-white shadow-lg hover:scale-102 active:scale-98"
+              className="cursor-pointer rounded-l-lg rounded-r-none h-32 px-3 py-1 bg-indigo-500 hover:bg-indigo-900 text-white shadow-lg hover:scale-102 active:scale-98"
               size="lg"
             >
               <div className="flex flex-col items-center gap-2">

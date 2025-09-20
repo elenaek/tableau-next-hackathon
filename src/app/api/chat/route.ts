@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
     const patientInfo = patientContext ? `
 Patient Information:
 - Name: ${patientContext.name}
+- Age: ${patientContext.age}
+- Patient Gender: ${patientContext.gender}
 - Diagnosis: ${patientContext.diagnosis}
 - Department: ${patientContext.department}
 - Treatment Status: ${patientContext.treatmentStatus}

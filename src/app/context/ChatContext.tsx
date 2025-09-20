@@ -143,6 +143,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
           name: patientData.name,
           diagnosis: patientData.diagnosis,
           department: patientData.department,
+          gender: patientData.gender,
+          age: patientData.age,
           treatmentStatus: patientData.treatmentStatus,
           treatmentProgress: patientData.treatmentProgress,
           providerNotes: patientData.providerNotes,

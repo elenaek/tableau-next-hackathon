@@ -65,6 +65,7 @@ interface PatientData {
   id: string;
   name: string;
   age: string;
+  gender: 'Male' | 'Female';
   medicalRecordNumber: string;
   diagnosis: string;
   admissionDate: string;
@@ -412,6 +413,7 @@ export default function PatientDashboard() {
         id: patientId,
         name: 'John Doe',
         age: '25',
+        gender: 'Male',
         medicalRecordNumber: 'MRN-2024-001',
         diagnosis: 'Acute Bronchitis',
         admissionDate: new Date('2024-01-15').toLocaleString(),
@@ -437,6 +439,7 @@ export default function PatientDashboard() {
         patient_mrn__c: 'medicalRecordNumber',
         diagnosis__c: 'diagnosis',
         patient_age__c: 'age',
+        patient_gender__c: 'gender',
         room_number__c: 'roomNumber',
         department__c: 'department',
         admission_date__c: 'admissionDate',
@@ -488,6 +491,9 @@ export default function PatientDashboard() {
         }
         else if(field === fieldConversion.admission_date__c) {
           mappedData[fieldConversion[field] as keyof PatientData] = new Date(res?.data[0][index]).toLocaleString() as never;
+        }
+        else if(field === fieldConversion.patient_gender__c) {
+          mappedData[fieldConversion[field] as keyof PatientData] = (res?.data[0][index] == 'M' ? 'Male' : 'Female') as never;
         }
         else {
           mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];

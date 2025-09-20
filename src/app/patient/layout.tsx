@@ -10,7 +10,6 @@ import {
   FileText,
   Home,
   LogOut,
-  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/app/context/AuthContext';
@@ -94,16 +93,6 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
 
         {/* Footer */}
         <div className={`mt-auto ${isCollapsed ? 'p-2' : 'p-4'} border-t`}>
-          <Link href="/patient/settings">
-            <Button
-              variant="ghost"
-              className={`w-full mb-2 cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
-              title={isCollapsed ? 'Settings' : undefined}
-            >
-              <Settings className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4 mr-3'}`} />
-              {!isCollapsed && <span>Settings</span>}
-            </Button>
-          </Link>
           <Button
             variant="ghost"
             className={`w-full cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start text-red-500 hover:text-red-600'}`}

@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       case 'diagnosis-explainer':
         prompt = `# Context
         - You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.
-        - A patient is in the hospital for the following diagnosis: ${context.diagnosis} and in need of assurance, support and explanation.
+        - A patient that is ${context.gender} and ${context.age} years old is in the hospital for the following diagnosis: ${context.diagnosis} and in need of assurance, support and explanation.
 
         # Your Task
         - Explain the following diagnosis to a patient in simple, encouraging terms: ${context.diagnosis}.
