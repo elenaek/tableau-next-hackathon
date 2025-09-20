@@ -81,8 +81,18 @@ interface PatientData {
 interface DepartmentStatus {
   department: string;
   occupancy: number;
+  currentPatients: number;
   waitTime?: number;
   staffCount: number;
+  availableBeds: number;
+  totalBeds: number;
+  staffOnDuty: {
+    physicians: number;
+    nurses: number;
+    support: number;
+  };
+  lastUpdated: string;
+  status: string;
 }
 
 interface AIInsight {
@@ -559,14 +569,25 @@ export default function PatientDashboard() {
     });
     const maxOccupancyPerDepartment = 10;
     const res = await response.json();
+    const occupancy = res?.data[0][0];
     const occupancyPercentage = (res?.data[0][0]/maxOccupancyPerDepartment)*100;
     const departmentData = {
       department: patientData?.department,
       occupancy: occupancyPercentage,
+      currentPatients: occupancy,
       waitTime: Math.round(12 * (occupancyPercentage/100) * 4),
-      staffCount: 12
+      staffCount: 12,
+      availableBeds: maxOccupancyPerDepartment - occupancy,
+      totalBeds: maxOccupancyPerDepartment,
+      staffOnDuty: {
+        physicians: 2,
+        nurses: 5,
+        support: 6
+      },
+      lastUpdated: new Date().toISOString()
     } as DepartmentStatus;
     setDepartmentStatus(departmentData);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA, JSON.stringify(departmentData));
   }, [patientData?.department]);
 
   useEffect(() => {
@@ -574,6 +595,7 @@ export default function PatientDashboard() {
     const handleBeforeUnload = () => {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA);
       }
     };
 
@@ -669,7 +691,7 @@ export default function PatientDashboard() {
         <div className="flex justify-between items-center mb-6">
         <div>
           <Sparkles className="inline-block" particleColor="lightblue" particleCount={10}>
-            <h1 className="text-3xl font-bold">Patient Dashboard</h1>
+            <h1 className="text-3xl font-bold">Your Dashboard</h1>
           </Sparkles>
           <p className="text-muted-foreground">Your healthcare journey at a glance</p>
         </div>

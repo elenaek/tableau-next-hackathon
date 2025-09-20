@@ -166,7 +166,7 @@ export function AgentforceChat() {
             >
               <div className="flex flex-col items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
-                <span className="text-xs font-medium writing-mode-vertical">Agentforce Chat</span>
+                <span className="text-xs font-medium writing-mode-vertical pb-1">Agentforce Chat</span>
               </div>
             </Button>
           </motion.div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// import { Button } from '@/components/ui/button';
 import {
   Heart,
   Activity,
@@ -17,13 +16,12 @@ import {
   Calendar,
   AlertCircle,
   Info
-  // ChevronLeft,
-  // ChevronRight
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { Sparkles } from '@/components/ui/sparkles';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { motion } from 'framer-motion';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface VitalReading {
   timestamp: string;
@@ -180,17 +178,9 @@ export default function VitalsPage() {
     }
   };
 
-  // Removed unused getStatusColor function
-  // const getStatusColor = (status: string) => {
-  //   switch (status) {
-  //     case 'critical':
-  //       return 'text-red-600 bg-red-100 dark:bg-red-950';
-  //     case 'warning':
-  //       return 'text-orange-600 bg-orange-100 dark:bg-orange-950';
-  //     default:
-  //       return 'text-green-600 bg-green-100 dark:bg-green-950';
-  //   }
-  // };
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.VITALS_DATA, JSON.stringify(mockVitals));
+  }, []);
 
   const getStatusBadgeVariant = (status: string): "default" | "destructive" | "secondary" => {
     switch (status) {
@@ -337,14 +327,6 @@ export default function VitalsPage() {
                     <CardDescription>Tracking history and analysis</CardDescription>
                   </div>
                 </div>
-                {/* <div className="flex gap-2">
-                  <Button variant="outline" size="icon">
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div> */}
               </div>
             </CardHeader>
             <CardContent className="space-y-6">

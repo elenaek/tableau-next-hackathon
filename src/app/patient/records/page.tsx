@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -201,6 +201,10 @@ export default function MedicalRecordsPage() {
   const [draftMessage, setDraftMessage] = useState<string>('');
   const [isLoadingDraft, setIsLoadingDraft] = useState(false);
   const [showDraftMessage, setShowDraftMessage] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.MEDICAL_RECORDS_DATA, JSON.stringify(mockRecords));
+  }, []);
 
   const filteredRecords = mockRecords.filter(record => {
     const matchesSearch = record.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

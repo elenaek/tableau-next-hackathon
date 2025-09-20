@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface Message {
@@ -57,6 +58,8 @@ interface ChatProviderProps {
 }
 
 export function ChatProvider({ children }: ChatProviderProps) {
+  const pathname = usePathname();
+
   // Load saved state from localStorage
   const getSavedState = () => {
     if (typeof window !== 'undefined') {
@@ -155,6 +158,110 @@ export function ChatProvider({ children }: ChatProviderProps) {
     return null;
   };
 
+  // Get medical records context when on records page
+  const getMedicalRecordsContext = () => {
+    if (!pathname?.includes('/patient/records')) return null;
+
+    try {
+      const cached = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.MEDICAL_RECORDS_DATA) || '[]');
+      if (cached) {
+        return {
+          recentRecords: [...cached],
+          summary: `Patient has ${cached.length} medical records.`
+        };
+      }
+    } catch (error) {
+      console.error('Error getting medical records context:', error);
+    }
+
+    // Return mock data if no cached data
+    return {
+      recentRecords: [
+        { type: 'Lab Results', title: 'Complete Blood Count', date: '2024-01-15', status: 'Final' },
+        { type: 'Imaging', title: 'Chest X-Ray', date: '2024-01-14', status: 'Final' },
+        { type: 'Consultation', title: 'Cardiology Consult', date: '2024-01-13', status: 'Completed' }
+      ],
+      summary: 'Patient has 12 medical records including lab results, imaging, and consultation notes.'
+    };
+  };
+
+  // Get vitals context when on vitals page
+  const getVitalsContext = () => {
+    if (!pathname?.includes('/patient/vitals')) return null;
+    const vitalsTypeConversion = {
+      'heart-rate': 'heartRate',
+      'blood-pressure': 'bloodPressure',
+      'temperature': 'temperature',
+      'respiratory-rate': 'respiratoryRate',
+      'oxygen-saturation': 'oxygenSaturation'
+    }
+
+    try {
+      const cached = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.VITALS_DATA) || '[]');
+      if (cached) {
+        const vitals = {current: {}, history: {}};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        cached.forEach((vital: any) => {
+          vitals.current = {
+            ...vitals.current,
+            [vitalsTypeConversion[vital.type as keyof typeof vitalsTypeConversion]]: {...vital.current, trend: vital.trend}
+          };
+          vitals.history = {
+            ...vitals.history,
+            [vitalsTypeConversion[vital.type as keyof typeof vitalsTypeConversion]]: vital.history
+          };
+        })
+        return vitals;
+      }
+    } catch (error) {
+      console.error('Error getting vitals context:', error);
+    }
+
+    // Return mock data if no cached data
+    return {
+      current: {
+        heartRate: { value: 72, unit: 'bpm', status: 'normal' },
+        bloodPressure: { value: '118/76', unit: 'mmHg', status: 'normal' },
+        temperature: { value: 98.6, unit: '°F', status: 'normal' },
+        respiratoryRate: { value: 16, unit: 'breaths/min', status: 'normal' },
+        oxygenSaturation: { value: 98, unit: '%', status: 'normal' }
+      },
+      history: {}
+    };
+  };
+
+  // Get department status context when on dashboard page
+  const getDepartmentContext = () => {
+    if (!pathname || (pathname !== '/' && pathname !== '/patient/dashboard')) return null;
+
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (error) {
+      console.error('Error getting department context:', error);
+    }
+
+    // Return mock data if no cached data
+    return {
+      department: 'Emergency Department',
+      occupancy: 78,
+      availableBeds: 5,
+      totalBeds: 23,
+      waitTime: 45,
+      staffOnDuty: {
+        physicians: 4,
+        nurses: 12,
+        support: 8
+      },
+      currentPatients: 18,
+      averageStayTime: '4.5 hours',
+      status: 'Moderate - Some delays expected',
+      lastUpdated: new Date().toISOString()
+    };
+  };
+
   // Clear all messages and reset to initial state
   const clearMessages = useCallback(() => {
     setMessages([
@@ -184,6 +291,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     try {
       const patientContext = getPatientContext();
+      const medicalRecordsContext = getMedicalRecordsContext();
+      const vitalsContext = getVitalsContext();
+      const departmentContext = getDepartmentContext();
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -193,9 +303,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
         body: JSON.stringify({
           message: input,
           patientContext,
+          medicalRecordsContext,
+          vitalsContext,
+          departmentContext,
+          currentPage: pathname,
           conversationHistory: messages.slice(-5) // Send last 5 messages for context
         }),
       });
+
+
 
       if (!response.ok) {
         throw new Error('Failed to get response');

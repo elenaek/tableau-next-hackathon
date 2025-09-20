@@ -27,7 +27,7 @@ export function DemoDisclaimer() {
         <div className="flex items-center gap-3">
           <InfoIcon className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm font-medium">
-            <span className="font-bold">Demo Mode:</span> All patient data shown is synthetic and for demonstration purposes only.
+            <span className="font-bold">Demo Mode:</span> All patient data shown is synthetic and for demonstration purposes only. No real patient data is used.
           </p>
         </div>
         <Button
