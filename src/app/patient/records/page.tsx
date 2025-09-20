@@ -17,13 +17,18 @@ import {
   FlaskConical,
   Image,
   FileX,
-  ChevronRight
+  ChevronRight,
+  Brain,
+  Loader2,
+  Info
   // Eye
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { Sparkles } from '@/components/ui/sparkles';
 import { motion } from 'framer-motion';
+import remarkGfm from 'remark-gfm';
+import Markdown from 'react-markdown';
 
 interface MedicalRecord {
   id: string;
@@ -41,91 +46,137 @@ interface MedicalRecord {
 const mockRecords: MedicalRecord[] = [
   {
     id: '1',
-    type: 'lab',
+    type: 'lab' as const,
     title: 'Complete Blood Count (CBC)',
     date: '2024-01-18',
     provider: 'Dr. Sarah Johnson',
     department: 'Laboratory',
-    status: 'final',
+    status: 'final' as const,
     summary: 'WBC: 7.2, RBC: 4.8, Hemoglobin: 14.5, Platelets: 250',
     attachments: 1
   },
   {
     id: '2',
-    type: 'imaging',
+    type: 'imaging' as const,
     title: 'Chest X-Ray',
     date: '2024-01-17',
     provider: 'Dr. Michael Chen',
     department: 'Radiology',
-    status: 'final',
+    status: 'final' as const,
     summary: 'Mild infiltrates in lower lobes consistent with bronchitis. No pneumonia.',
     attachments: 3,
     critical: true
   },
   {
     id: '3',
-    type: 'consultation',
+    type: 'consultation' as const,
     title: 'Pulmonology Consultation',
     date: '2024-01-16',
     provider: 'Dr. Emily Rodriguez',
     department: 'Pulmonology',
-    status: 'final',
+    status: 'final' as const,
     summary: 'Acute bronchitis diagnosis confirmed. Recommended treatment plan initiated.',
     attachments: 1
   },
   {
     id: '4',
-    type: 'prescription',
+    type: 'prescription' as const,
     title: 'Antibiotic Therapy - Amoxicillin',
     date: '2024-01-16',
     provider: 'Dr. Sarah Johnson',
     department: 'Internal Medicine',
-    status: 'final',
+    status: 'final' as const,
     summary: '500mg, 3 times daily for 7 days'
   },
   {
     id: '5',
-    type: 'lab',
+    type: 'lab' as const,
     title: 'Sputum Culture',
     date: '2024-01-16',
     provider: 'Lab Services',
     department: 'Laboratory',
-    status: 'preliminary',
+    status: 'preliminary' as const,
     summary: 'Culture pending - preliminary results expected in 48 hours'
   },
   {
     id: '6',
-    type: 'procedure',
+    type: 'procedure' as const,
     title: 'Spirometry Test',
     date: '2024-01-15',
     provider: 'RT James Wilson',
     department: 'Respiratory Therapy',
-    status: 'final',
+    status: 'final' as const,
     summary: 'FEV1: 78% predicted, FVC: 82% predicted. Mild obstruction noted.',
     attachments: 2
   },
   {
     id: '7',
-    type: 'vaccination',
+    type: 'vaccination' as const,
     title: 'Influenza Vaccine',
     date: '2023-10-15',
     provider: 'Nurse Patricia Davis',
     department: 'Preventive Care',
-    status: 'final',
+    status: 'final' as const,
     summary: 'Annual flu vaccine administered'
   },
   {
     id: '8',
-    type: 'lab',
+    type: 'lab' as const,
     title: 'COVID-19 PCR Test',
     date: '2024-01-15',
     provider: 'Lab Services',
     department: 'Laboratory',
-    status: 'final',
+    status: 'final' as const,
     summary: 'Negative',
     critical: false
-  }
-];
+  },
+  {
+    id: '9',
+    type: 'lab' as const,
+    title: 'Blood Culture (x2)',
+    date: new Date(new Date().setDate(new Date().getDate() - 6)).toString() || '',
+    provider: 'Lab Services',
+    department: 'Laboratory',
+    status: 'final' as const,
+    summary: 'Abnormal (WBC 10, Hemoglobin: 12, Hematocrit 37%, Platelets 300)',
+    critical: false
+  },
+  {
+    id: '10',
+    type: 'imaging' as const,
+    title: 'Chest X-Ray',
+    date: new Date(new Date().setDate(new Date().getDate() - 3)).toString() || '',
+    provider: 'Dr. Michael Chen',
+    department: 'Radiology',
+    status: 'final' as const,
+    summary: 'Right lower lobe pneumonia. Recommend follow-up imaging to document resolution.',
+    critical: false
+  },
+  {
+    id: '11',
+    type: 'imaging' as const,
+    title: 'CT Thorax',
+    date: new Date(new Date().setDate(new Date().getDate() - 3)).toString() || '',
+    provider: 'Dr. Michael Chen',
+    department: 'Radiology',
+    status: 'final' as const,
+    summary: 'Right lower lobe pneumonia without abscess formation.',
+    critical: false
+  },
+  {
+    id: '12',
+    type: 'imaging' as const,
+    title: 'Ultrasound',
+    date: new Date(new Date().setDate(new Date().getDate() - 2)).toString() || '',
+    provider: 'Dr. Michael Chen',
+    department: 'Radiology',
+    status: 'final' as const,
+    summary: 'Findings consistent with pneumonia with small, uncomplicated pleural effusion.',
+    critical: false
+  },
+].reverse();
+
+
 
 const recordTypeConfig = {
   lab: { icon: FlaskConical, color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
@@ -140,6 +191,9 @@ export default function MedicalRecordsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
+  const [aiExplanation, setAiExplanation] = useState<string>('');
+  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const filteredRecords = mockRecords.filter(record => {
     const matchesSearch = record.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -165,6 +219,51 @@ export default function MedicalRecordsPage() {
       default:
         return 'secondary';
     }
+  };
+
+  const getAIExplanation = async (record: MedicalRecord) => {
+    setIsLoadingExplanation(true);
+    setShowExplanation(true);
+    setAiExplanation('');
+
+    try {
+      const response = await fetch('/api/ai-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'record-explanation',
+          patientId: 'demo-patient',
+          context: {
+            recordType: record.type,
+            recordTitle: record.title,
+            recordDate: record.date,
+            recordSummary: record.summary || '',
+            recordStatus: record.status,
+            provider: record.provider
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI explanation');
+      }
+
+      const data = await response.json();
+      setAiExplanation(data.insight);
+    } catch (error) {
+      console.error('Error getting AI explanation:', error);
+      setAiExplanation('Unable to generate explanation at this time. Please try again later.');
+    } finally {
+      setIsLoadingExplanation(false);
+    }
+  };
+
+  const handleRecordSelection = (record: MedicalRecord) => {
+    setSelectedRecord(record);
+    setShowExplanation(false);
+    setAiExplanation('');
   };
 
   return (
@@ -250,7 +349,7 @@ export default function MedicalRecordsPage() {
                       className={`p-4 rounded-lg border transition-all hover:shadow-md cursor-pointer ${
                         selectedRecord?.id === record.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
                       }`}
-                      onClick={() => setSelectedRecord(record)}
+                      onClick={() => handleRecordSelection(record)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex gap-3 flex-1">
@@ -368,12 +467,63 @@ export default function MedicalRecordsPage() {
                       )}
                     </div>
 
-                    {/* <div className="flex gap-2 pt-4">
-                      <Button className="flex-1" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Full Record
+                    {/* AI Explanation Section */}
+                    <div className="border-t pt-4">
+                      <Button
+                        className="w-full cursor-pointer active:scale-98"
+                        size="sm"
+                        onClick={() => getAIExplanation(selectedRecord)}
+                        disabled={isLoadingExplanation}
+                      >
+                        {isLoadingExplanation ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Generating Explanation...
+                          </>
+                        ) : (
+                          <>
+                            <Brain className="h-4 w-4 mr-2" />
+                            Help me understand this record
+                          </>
+                        )}
                       </Button>
-                    </div> */}
+
+                      {showExplanation && aiExplanation && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 space-y-2"
+                        >
+                          <div className="flex items-center gap-2 text-sm font-medium">
+                            <Info className="h-4 w-4 text-blue-500" />
+                            <span>AI-Generated Explanation</span>
+                          </div>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <Markdown remarkPlugins={[remarkGfm]}
+                              components={{
+                                h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                                h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                                h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                                p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                                ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                                ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                                li: ({ children }) => <li className="mb-1">{children}</li>,
+                              }}
+                            >
+                              {aiExplanation}
+                          </Markdown>
+                              {/* <div dangerouslySetInnerHTML={{ __html: aiExplanation.replace(/\n/g, '<br />') }} /> */}
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground italic">
+                            This explanation is AI-generated to help you understand your medical records.
+                            Always consult with your healthcare provider for professional medical advice.
+                          </p>
+                        </motion.div>
+                      )}
+                    </div>
 
                     {selectedRecord.attachments && selectedRecord.attachments > 0 && (
                       <div className="border-t pt-4">

@@ -73,6 +73,44 @@ export async function POST(request: NextRequest) {
                   Provide context about what this means for their care and reassure them about receiving attention.`;
         break;
 
+      case 'record-explanation':
+        prompt = `# Context
+        - You are a helpful medical assistant providing clear, simple explanations to patients about their medical records.
+        - A patient is reviewing their medical record and needs help understanding what it means.
+
+        # Medical Record Information
+        - Record Type: ${context.recordType}
+        - Record Title: ${context.recordTitle}
+        - Date: ${context.recordDate}
+        - Provider: ${context.provider}
+        - Status: ${context.recordStatus}
+        - Summary/Results: ${context.recordSummary}
+
+        # Your Task
+        Provide a clear, compassionate explanation of this medical record in patient-friendly language.
+
+        # Requirements
+        - Use simple, non-technical language that any patient can understand
+        - Explain what the test/procedure was for
+        - Explain what the results mean in practical terms
+        - If results are abnormal, be reassuring and explain what this typically means
+        - If results are normal, celebrate this positive outcome
+        - Explain any next steps or follow-up that might be expected
+        - Keep the explanation under 300 words
+        - Be encouraging and supportive
+        - Use markdown formatting for clarity
+
+        # Output Format:
+        Start with a brief summary of what this record is about, then explain:
+        1. **What this test/procedure was:** Brief explanation
+        2. **What the results mean:** Clear interpretation
+        3. **What this means for you:** Practical implications
+        4. **Next steps:** What to expect or do next (if applicable)
+        5. **Questions to ask the care team:** What questions the patient could ask the care team to help them understand the record and treatment process.
+
+        Remember to be compassionate, clear, and reassuring in your explanation.`;
+        break;
+
       default:
         return NextResponse.json(
           { error: 'Invalid insight type' },
