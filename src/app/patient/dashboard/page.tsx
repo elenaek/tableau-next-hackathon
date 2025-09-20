@@ -77,6 +77,13 @@ interface PatientData {
   isMock: boolean;
 }
 
+interface DepartmentStatus {
+  department: string;
+  occupancy: number;
+  waitTime?: number;
+  staffCount: number;
+}
+
 interface AIInsight {
   type: string;
   insight: string;
@@ -335,7 +342,7 @@ export default function PatientDashboard() {
   const [loadingInsightType, setLoadingInsightType] = useState<string | null>(null);
   const [, setShowNotification] = useState(false);
   const [, setNotificationMessage] = useState('');
-
+  const [departmentStatus, setDepartmentStatus] = useState<DepartmentStatus | null>(null);
   const patientId = 'P8045221';
   // const patientId = 'patient-123';
 
@@ -390,7 +397,6 @@ export default function PatientDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           patientId,
-          sql: `SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'`
         })
       });
 
@@ -536,6 +542,26 @@ export default function PatientDashboard() {
     }
   ];
 
+  const fetchDepartmentData = useCallback(async () => {
+    const response = await fetch('/api/department', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        department: patientData?.department
+      })
+    });
+    const maxOccupancyPerDepartment = 10;
+    const res = await response.json();
+    const occupancyPercentage = (res?.data[0][0]/maxOccupancyPerDepartment)*100;
+    const departmentData = {
+      department: patientData?.department,
+      occupancy: occupancyPercentage,
+      waitTime: Math.round(12 * (occupancyPercentage/100) * 4),
+      staffCount: 12
+    } as DepartmentStatus;
+    setDepartmentStatus(departmentData);
+  }, [patientData?.department]);
+
   useEffect(() => {
     // Clear cache on page refresh/unload
     const handleBeforeUnload = () => {
@@ -560,6 +586,12 @@ export default function PatientDashboard() {
     };
   }, [fetchPatientData, loadCachedPatientData]);
 
+  useEffect(() => {
+    if (patientData?.department) {
+      fetchDepartmentData();
+    }
+  }, [fetchDepartmentData, patientData?.department]);
+
   const generateInsight = async (type: string) => {
     setLoadingInsightType(type);
     try {
@@ -568,11 +600,11 @@ export default function PatientDashboard() {
         admissionDate: patientData?.admissionDate,
         status: patientData?.treatmentStatus,
         department: patientData?.department,
-        treatmentPlan: 'Antibiotics, respiratory therapy, rest',
+        treatmentPlan: type === 'treatment-progress' ? patientData?.treatmentProgress : 'Antibiotics, respiratory therapy, rest',
         vitals: 'Stable, improving oxygen saturation',
-        occupancy: 75,
-        waitTime: 20,
-        staffCount: 12
+        occupancy: departmentStatus?.occupancy,
+        waitTime: departmentStatus?.waitTime,
+        staffCount: departmentStatus?.staffCount
       };
 
       const response = await fetch('/api/ai-insights', {
@@ -846,74 +878,115 @@ export default function PatientDashboard() {
           </AnimatedCard>
 
           {/* Department Status */}
-          <AnimatedCard>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Hospital className="w-5 h-5 text-red-600" />
-                Department Status
-              </CardTitle>
-              <CardDescription>Current activity in {patientData?.department}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="p-3 bg-secondary rounded-lg">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Occupancy</span>
+          {departmentStatus ? (
+            <AnimatedCard>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Hospital className="w-5 h-5 text-red-600" />
+                  Department Status
+                </CardTitle>
+                <CardDescription>Current activity in {patientData?.department}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="p-3 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Occupancy</span>
+                    </div>
+                    <p className="text-xl font-bold mt-1">{departmentStatus.occupancy}%</p>
                   </div>
-                  <p className="text-xl font-bold mt-1">75%</p>
-                </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Wait Time</span>
+                  <div className="p-3 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Wait Time</span>
+                    </div>
+                    <p className="text-xl font-bold mt-1">{departmentStatus.waitTime} min</p>
                   </div>
-                  <p className="text-xl font-bold mt-1">20 min</p>
-                </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                  <div className="flex items-center gap-1">
-                    <User className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Staff</span>
+                  <div className="p-3 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Staff</span>
+                    </div>
+                    <p className="text-xl font-bold mt-1">{departmentStatus.staffCount}</p>
                   </div>
-                  <p className="text-xl font-bold mt-1">12</p>
                 </div>
-              </div>
 
-              {loadingInsightType === 'department-busyness' ? (
-                <LoadingInsight message="Checking department status" />
-              ) : departmentInsight ? (
-                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                  <Markdown remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                      h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                      h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                      p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                      ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
-                      li: ({ children }) => <li className="mb-1">{children}</li>,
-                    }}
-                  >{departmentInsight.insight}</Markdown>
-                  {/* <p className="text-sm">{departmentInsight.insight}</p> */}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Generated at {new Date(departmentInsight.timestamp).toLocaleTimeString()}
-                  </p>
-                </div>
-              ) : (
-                <Button
-                  onClick={() => generateInsight('department-busyness')}
-                  disabled={loadingInsightType !== null}
-                  variant="outline"
-                  className="w-full cursor-pointer bg-gradient-to-r from-red-300 to-red-400 hover:from-red-400 hover:to-red-500 active:scale-98"
-                >
-                  <Info className="w-4 h-4 mr-2" />
-                  Explain Department Status
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-          </AnimatedCard>
+                {loadingInsightType === 'department-busyness' ? (
+                  <LoadingInsight message="Checking department status" />
+                ) : departmentInsight ? (
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <Markdown remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                        h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                        h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                        p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                        ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                        ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                      }}
+                    >{departmentInsight.insight}</Markdown>
+                    {/* <p className="text-sm">{departmentInsight.insight}</p> */}
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Generated at {new Date(departmentInsight.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => generateInsight('department-busyness')}
+                    disabled={loadingInsightType !== null}
+                    variant="outline"
+                    className="w-full cursor-pointer bg-gradient-to-r from-red-300 to-red-400 hover:from-red-400 hover:to-red-500 active:scale-98"
+                  >
+                    <Info className="w-4 h-4 mr-2" />
+                    Explain Department Status
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+            </AnimatedCard>
+            ) :
+            (
+              <AnimatedCard>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Hospital className="w-5 h-5 text-red-600" />
+                    Department Status
+                  </CardTitle>
+                  <CardDescription>Data not available</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="p-3 bg-secondary rounded-lg">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Occupancy</span>
+                      </div>
+                      <p className="text-xl font-bold mt-1">---</p>
+                    </div>
+                    <div className="p-3 bg-secondary rounded-lg">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Wait Time</span>
+                      </div>
+                      <p className="text-xl font-bold mt-1">---</p>
+                    </div>
+                    <div className="p-3 bg-secondary rounded-lg">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">Staff</span>
+                      </div>
+                      <p className="text-xl font-bold mt-1">---</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              </AnimatedCard>
+              )
+          }
         </div>
       </div>
 

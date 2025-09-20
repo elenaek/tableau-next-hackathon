@@ -29,18 +29,18 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { patientId, sql } = body;
+    const { patientId } = body;
 
-    if (!patientId || !sql) {
+    if (!patientId) {
       return NextResponse.json(
-        { error: 'Patient ID and action are required' },
+        { error: 'Patient ID is required' },
         { status: 400 }
       );
     }
 
     const client = getSalesforceClient();
     const patientData = await client.query(`
-      SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'
+      SELECT * FROM hospital_patient_snaps19204202568__dll WHERE patient_id__c = '${patientId}'
     `);
     
     return NextResponse.json(patientData);
