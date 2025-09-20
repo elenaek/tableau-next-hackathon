@@ -366,7 +366,7 @@ export default function PatientDashboard() {
         const parsedData = JSON.parse(cached);
         // Verify it's for the same patient
         if (parsedData.id === patientId) {
-          console.log('Loading patient data from cache');
+          // console.log('Loading patient data from cache');
           return parsedData;
         }
       }
@@ -385,7 +385,7 @@ export default function PatientDashboard() {
         const parsedData = JSON.parse(cached);
         // Verify it's for the same patient
         if (Object.keys(parsedData).length > 0) {
-          console.log('Loading department data from cache');
+          // console.log('Loading department data from cache');
           return parsedData;
         }
       }
@@ -400,7 +400,7 @@ export default function PatientDashboard() {
 
     try {
       localStorage.setItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE, JSON.stringify(data));
-      console.log('Patient data cached successfully');
+      // console.log('Patient data cached successfully');
     } catch (error) {
       console.error('Error caching patient data:', error);
     }
@@ -611,7 +611,7 @@ export default function PatientDashboard() {
       lastUpdated: new Date().toISOString()
     } as DepartmentStatus;
     if(!departmentData.status) {
-      departmentData.status = JSON.parse(await generateDepartmentBusynessDescriptor(departmentData));
+      departmentData.status = await generateDepartmentBusynessDescriptor(departmentData);
     }
     setDepartmentStatus(departmentData);
     localStorage.setItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA, JSON.stringify(departmentData));
@@ -660,7 +660,6 @@ export default function PatientDashboard() {
           })
         });
         const res = await response.json();
-        console.log(res);
         return res.insight;
       } catch (error) {
         console.error('Error generating department busyness descriptor:', error);
@@ -965,9 +964,46 @@ export default function PatientDashboard() {
                   <Hospital className="w-5 h-5 text-red-600" />
                   Department Status
                 </CardTitle>
-                <CardDescription>Current activity in {patientData?.department}</CardDescription>
+                <CardDescription>Current state of activity in {patientData?.department}</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Status Header */}
+                {departmentStatus.status && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-lg border border-orange-200 dark:border-orange-900">
+                    <div className="flex items-center justify-center gap-2">
+                      <Activity className="w-5 h-5 text-orange-600 animate-pulse" />
+                      <span className="font-semibold text-lg text-orange-900 dark:text-orange-300">
+                        {departmentStatus.status}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Wait Times Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-red-600" />
+                      <span className="text-xs text-red-600 font-medium">High Risk Cases</span>
+                    </div>
+                    <p className="text-xl font-bold mt-1 text-red-800 dark:text-red-300">
+                      {Math.max(5, Math.round((departmentStatus?.waitTime || 0) * 0.3))} min
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">Priority queue</p>
+                  </div>
+                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-blue-600" />
+                      <span className="text-xs text-blue-600 font-medium">Normal Cases</span>
+                    </div>
+                    <p className="text-xl font-bold mt-1 text-blue-800 dark:text-blue-300">
+                      {Math.round((departmentStatus.waitTime || 0) * 1.2)} min
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">Standard queue</p>
+                  </div>
+                </div>
+
+                {/* Department Metrics */}
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="p-3 bg-secondary rounded-lg">
                     <div className="flex items-center gap-1">
@@ -978,10 +1014,10 @@ export default function PatientDashboard() {
                   </div>
                   <div className="p-3 bg-secondary rounded-lg">
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">Wait Time</span>
+                      <Hospital className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Available</span>
                     </div>
-                    <p className="text-xl font-bold mt-1">{departmentStatus.waitTime} min</p>
+                    <p className="text-xl font-bold mt-1">{departmentStatus.availableBeds}</p>
                   </div>
                   <div className="p-3 bg-secondary rounded-lg">
                     <div className="flex items-center gap-1">
@@ -1038,30 +1074,40 @@ export default function PatientDashboard() {
                     <Hospital className="w-5 h-5 text-red-600" />
                     Department Status
                   </CardTitle>
-                  <CardDescription>Data not available</CardDescription>
+                  <CardDescription>Loading department information...</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Occupancy</span>
+                  {/* Loading Spinner */}
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                    <p className="text-sm text-muted-foreground">Fetching department status...</p>
+                  </div>
+
+                  {/* Skeleton Loading State */}
+                  <div className="space-y-4 mt-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-muted/30 rounded-lg animate-pulse">
+                        <div className="h-3 w-20 bg-muted rounded mb-2"></div>
+                        <div className="h-6 w-16 bg-muted rounded"></div>
                       </div>
-                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Checking Occupancy" /></p>
+                      <div className="p-3 bg-muted/30 rounded-lg animate-pulse">
+                        <div className="h-3 w-20 bg-muted rounded mb-2"></div>
+                        <div className="h-6 w-16 bg-muted rounded"></div>
+                      </div>
                     </div>
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Wait Time</span>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="p-3 bg-muted/30 rounded-lg animate-pulse">
+                        <div className="h-3 w-16 bg-muted rounded mb-2"></div>
+                        <div className="h-6 w-12 bg-muted rounded"></div>
                       </div>
-                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Calculating Wait Time" /></p>
-                    </div>
-                    <div className="p-3 bg-secondary rounded-lg">
-                      <div className="flex items-center gap-1">
-                        <User className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Staff</span>
+                      <div className="p-3 bg-muted/30 rounded-lg animate-pulse">
+                        <div className="h-3 w-16 bg-muted rounded mb-2"></div>
+                        <div className="h-6 w-12 bg-muted rounded"></div>
                       </div>
-                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Checking Staff Count" /></p>
+                      <div className="p-3 bg-muted/30 rounded-lg animate-pulse">
+                        <div className="h-3 w-16 bg-muted rounded mb-2"></div>
+                        <div className="h-6 w-12 bg-muted rounded"></div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

@@ -202,12 +202,13 @@ export function AgentforceChat() {
               <Card className="w-full h-full flex flex-col border relative rounded-xl">
                 {/* Header */}
                 <div className={cn(
-                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-pink-50 to-indigo-50",
+                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-purple-50 to-indigo-50",
                   isMinimized ? "rounded-xl border" : "rounded-t-xl border-b"
                 )}>
                   <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-pink-400"/>
                     <h3 className="font-semibold text-sm">Agentforce Health Assistant</h3>
+                    <span className="text-xs text-muted-foreground">HIPAA Compliant with Agentforce</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button
