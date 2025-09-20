@@ -117,6 +117,54 @@ export async function POST(request: NextRequest) {
         Remember to be compassionate, clear, and reassuring in your explanation.`;
         break;
 
+      case 'draft-message':
+        prompt = `# Context
+        - You are a helpful assistant helping a patient draft a professional and clear message to their healthcare team.
+        - The patient wants to discuss a specific medical record with the appropriate department.
+
+        # Patient Information
+        - Patient Name: ${context.patientName}
+
+        # Medical Record Information
+        - Record Type: ${context.recordType}
+        - Record Title: ${context.recordTitle}
+        - Date: ${context.recordDate}
+        - Provider: ${context.provider}
+        - Department: ${context.department}
+        - Status: ${context.recordStatus}
+        - Summary/Results: ${context.recordSummary}
+
+        # Your Task
+        Draft a professional, respectful message from ${context.patientName} to the ${context.department} team about this medical record.
+
+        # Requirements
+        - Start with a polite greeting to the ${context.department} team
+        - Include the patient's name (${context.patientName}) when introducing themselves
+        - Clearly reference the specific medical record (title and date)
+        - Include 2-3 relevant questions or concerns the patient might have
+        - Maintain a respectful and professional tone
+        - Keep it concise (under 200 words)
+        - Sign off with the patient's name (${context.patientName})
+        - End with appreciation for their care
+
+        # Message Structure:
+        1. Greeting to the ${context.department} team
+        2. Introduction with patient name
+        3. Reference to the specific record
+        4. Main questions or concerns
+        5. Closing with appreciation
+        6. Sign off with patient name
+
+        # Example Topics to Include:
+        - Clarification about results or findings
+        - Questions about next steps or follow-up
+        - Concerns about symptoms or side effects
+        - Request for additional information or explanation
+        - Timeline questions
+
+        Remember to be professional, clear, and respectful while helping the patient communicate effectively with their care team.`;
+        break;
+
       default:
         return NextResponse.json(
           { error: 'Invalid insight type' },

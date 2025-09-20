@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   FileText,
   Download,
@@ -20,7 +21,9 @@ import {
   ChevronRight,
   Brain,
   Loader2,
-  Info
+  Info,
+  MessageSquare,
+  Copy
   // Eye
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
@@ -29,6 +32,7 @@ import { Sparkles } from '@/components/ui/sparkles';
 import { motion } from 'framer-motion';
 import remarkGfm from 'remark-gfm';
 import Markdown from 'react-markdown';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface MedicalRecord {
   id: string;
@@ -194,6 +198,9 @@ export default function MedicalRecordsPage() {
   const [aiExplanation, setAiExplanation] = useState<string>('');
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [draftMessage, setDraftMessage] = useState<string>('');
+  const [isLoadingDraft, setIsLoadingDraft] = useState(false);
+  const [showDraftMessage, setShowDraftMessage] = useState(false);
 
   const filteredRecords = mockRecords.filter(record => {
     const matchesSearch = record.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -260,10 +267,73 @@ export default function MedicalRecordsPage() {
     }
   };
 
+  const getPatientName = (): string => {
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE);
+      if (cached) {
+        const patientData = JSON.parse(cached);
+        return patientData.name || 'Patient';
+      }
+    } catch (error) {
+      console.error('Error getting patient name from cache:', error);
+    }
+    return 'Patient';
+  };
+
   const handleRecordSelection = (record: MedicalRecord) => {
     setSelectedRecord(record);
     setShowExplanation(false);
     setAiExplanation('');
+    setShowDraftMessage(false);
+    setDraftMessage('');
+  };
+
+  const draftMessageToProvider = async (record: MedicalRecord) => {
+    setIsLoadingDraft(true);
+    setShowDraftMessage(true);
+    setDraftMessage('');
+
+    const patientName = getPatientName();
+
+    try {
+      const response = await fetch('/api/ai-insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'draft-message',
+          patientId: 'demo-patient',
+          context: {
+            patientName: patientName,
+            recordType: record.type,
+            recordTitle: record.title,
+            recordDate: record.date,
+            recordSummary: record.summary || '',
+            recordStatus: record.status,
+            provider: record.provider,
+            department: record.department
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to draft message');
+      }
+
+      const data = await response.json();
+      setDraftMessage(data.insight);
+    } catch (error) {
+      console.error('Error drafting message:', error);
+      setDraftMessage('Unable to draft message at this time. Please try again later.');
+    } finally {
+      setIsLoadingDraft(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(draftMessage);
+    // You could add a toast notification here
   };
 
   return (
@@ -519,6 +589,83 @@ export default function MedicalRecordsPage() {
                           <p className="text-xs text-muted-foreground italic">
                             This explanation is AI-generated to help you understand your medical records.
                             Always consult with your healthcare provider for professional medical advice.
+                          </p>
+                        </motion.div>
+                      )}
+                    </div>
+
+                    {/* Draft Message Section */}
+                    <div className="border-t pt-4">
+                      <Button
+                        className={`w-full cursor-pointer active:scale-98 ${!isLoadingDraft && showDraftMessage ? 'hidden' : ''}`}
+                        size="sm"
+                        onClick={() => draftMessageToProvider(selectedRecord)}
+                        disabled={isLoadingDraft}
+                        variant="outline"
+                      >
+                        {isLoadingDraft ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Drafting Message...
+                          </>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Draft message to {selectedRecord.department} team
+                          </>
+                        )}
+                      </Button>
+
+                      {showDraftMessage && draftMessage && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="mt-4 space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <MessageSquare className="h-4 w-4 text-green-500" />
+                              <span>Draft Message to {selectedRecord.department}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={copyToClipboard}
+                              className="h-8"
+                            >
+                              <Copy className="h-3 w-3 mr-1" />
+                              Copy
+                            </Button>
+                          </div>
+                          <Textarea
+                            value={draftMessage}
+                            onChange={(e) => setDraftMessage(e.target.value)}
+                            className="min-h-[150px] text-sm"
+                            placeholder="Your draft message will appear here..."
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => {
+                                // Navigate to messages page with the draft
+                                window.location.href = `/patient/messages?draft=${encodeURIComponent(draftMessage)}&department=${encodeURIComponent(selectedRecord.department)}`;
+                              }}
+                            >
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              Send Message
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => draftMessageToProvider(selectedRecord)}
+                            >
+                              Regenerate
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground italic">
+                            This is an AI-generated draft message. Feel free to edit it before sending.
                           </p>
                         </motion.div>
                       )}

@@ -971,21 +971,21 @@ export default function PatientDashboard() {
                         <Users className="w-3 h-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">Occupancy</span>
                       </div>
-                      <p className="text-xl font-bold mt-1">---</p>
+                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Checking Occupancy" /></p>
                     </div>
                     <div className="p-3 bg-secondary rounded-lg">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">Wait Time</span>
                       </div>
-                      <p className="text-xl font-bold mt-1">---</p>
+                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Calculating Wait Time" /></p>
                     </div>
                     <div className="p-3 bg-secondary rounded-lg">
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground">Staff</span>
                       </div>
-                      <p className="text-xl font-bold mt-1">---</p>
+                      <p className="text-xl font-bold mt-1"><LoadingInsight message="Checking Staff Count" /></p>
                     </div>
                   </div>
                 </CardContent>
