@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/app/context/AuthContext';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface PatientLayoutProps {
   children: ReactNode;
@@ -24,7 +25,20 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Initialize collapsed state from localStorage
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SIDEBAR_COLLAPSED);
+      return saved === 'true';
+    }
+    return false;
+  });
+
+  // Persist collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.SIDEBAR_COLLAPSED, isCollapsed.toString());
+  }, [isCollapsed]);
 
   const handleLogout = () => {
     logout();
@@ -34,14 +48,13 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   const navItems = [
     { href: '/', icon: Home, label: 'Dashboard', tooltip: 'Dashboard' },
     { href: '/patient/records', icon: FileText, label: 'Medical Records', tooltip: 'Medical Records' },
-    { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' },
-    { href: '/patient/messages', icon: MessageSquare, label: 'Messages', tooltip: 'Messages' },
+    { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' }
   ];
 
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <aside className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-card flex flex-col`}>
+        <aside className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-card flex flex-col`}>
         {/* Header with toggle button */}
         <div className={`${isCollapsed ? 'p-4' : 'p-6'} flex items-center justify-between`}>
           {!isCollapsed && <h2 className="text-2xl font-bold">Patient Portal</h2>}

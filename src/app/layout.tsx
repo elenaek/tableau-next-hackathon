@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Track your health journey and progress through the medical system",
 };
 
-import { AuthProvider } from './context/AuthContext';
+import { ClientProviders } from './ClientProviders';
 
 export default function RootLayout({
   children,
@@ -35,9 +35,9 @@ export default function RootLayout({
       <body
         className={`${roboto.variable} ${robotoMono.variable} font-sans antialiased`}
       >
-        <AuthProvider>
+        <ClientProviders>
           {children}
-        </AuthProvider>
+        </ClientProviders>
       </body>
     </html>
   );

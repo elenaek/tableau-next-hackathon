@@ -165,6 +165,45 @@ export async function POST(request: NextRequest) {
         Remember to be professional, clear, and respectful while helping the patient communicate effectively with their care team.`;
         break;
 
+      case 'chat':
+        const patientInfo = context.patientContext ? `
+        Patient Information:
+        - Name: ${context.patientContext.name}
+        - Diagnosis: ${context.patientContext.diagnosis}
+        - Department: ${context.patientContext.department}
+        - Treatment Status: ${context.patientContext.treatmentStatus}
+        - Admission Date: ${context.patientContext.admissionDate}
+        ` : '';
+
+        const conversationHistory = context.conversationHistory?.length > 0 ?
+          context.conversationHistory.map((msg: { role: string; content: string }) => `${msg.role}: ${msg.content}`).join('\n') : '';
+
+        prompt = `# Context
+        You are an AI healthcare assistant helping a patient understand their medical care and records.
+
+        ${patientInfo}
+
+        # Recent Conversation
+        ${conversationHistory}
+
+        # User Message
+        ${context.message}
+
+        # Your Task
+        Provide a helpful, compassionate response to the patient's question or concern.
+
+        # Guidelines
+        - Use simple, clear language that patients can understand
+        - Be empathetic and supportive
+        - If discussing medical information, explain it in layman's terms
+        - Encourage the patient to discuss important concerns with their healthcare team
+        - Keep responses concise but informative (under 150 words)
+        - If you don't have specific information, acknowledge this and suggest they consult their care team
+        - Always maintain a professional and caring tone
+
+        Remember: You are here to help the patient understand their care better, not to provide medical advice or diagnoses.`;
+        break;
+
       default:
         return NextResponse.json(
           { error: 'Invalid insight type' },
