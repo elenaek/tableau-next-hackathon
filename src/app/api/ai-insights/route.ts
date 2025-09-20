@@ -18,6 +18,28 @@ export async function POST(request: NextRequest) {
     let prompt = '';
 
     switch (type) {
+      case 'department-busyness-summarizer':
+        prompt = `# Context
+        - You are given information about the current status of a hospital department.
+
+        # Your Task
+        - Use 1-3 words to describe the overall status of the department in a helpful manner for a patient waiting to be seen.
+
+        # Examples
+        - If the department is busy, you might say "Busy" or "Some Delays Expected".
+        - If the department is not busy, you might say "Steady Operations" or "No Delays Expected".
+
+        # Hospital Department Information
+        - Department: ${context.department}
+        - Current Occupancy: ${context.occupancy}% (${context.currentPatients} patients)
+        - Available Beds: ${context.availableBeds} out of ${context.totalBeds} total
+        - Current Wait Time: ${context.waitTime} minutes
+        - Staff on Duty:
+          - Physicians: ${context.staffOnDuty?.physicians}
+          - Nurses: ${context.staffOnDuty?.nurses}
+          - Support Staff: ${context.staffOnDuty?.support}
+        `;
+        break;
       case 'diagnosis-explainer':
         prompt = `# Context
         - You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.
@@ -204,14 +226,13 @@ export async function POST(request: NextRequest) {
         Remember: You are here to help the patient understand their care better, not to provide medical advice or diagnoses.`;
         break;
 
-
       default:
         return NextResponse.json(
           { error: 'Invalid insight type' },
           { status: 400 }
         );
     }
-
+    console.log(prompt);
     const aiResponse = await client.callAgentforceModel(prompt);
 
     return NextResponse.json({

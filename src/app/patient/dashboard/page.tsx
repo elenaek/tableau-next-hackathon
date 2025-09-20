@@ -92,7 +92,7 @@ interface DepartmentStatus {
     support: number;
   };
   lastUpdated: string;
-  status: string;
+  status?: string;
 }
 
 interface AIInsight {
@@ -376,6 +376,25 @@ export default function PatientDashboard() {
     return null;
   }, [patientId]);
 
+  const loadCachedDepartmentData = useCallback((): DepartmentStatus | null => {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA);
+      if (cached) {
+        const parsedData = JSON.parse(cached);
+        // Verify it's for the same patient
+        if (Object.keys(parsedData).length > 0) {
+          console.log('Loading department data from cache');
+          return parsedData;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached data:', error);
+    }
+    return null;
+  }, [departmentStatus?.department]);
+
   const cachePatientData = useCallback((data: PatientData) => {
     if (typeof window === 'undefined') return;
 
@@ -560,6 +579,11 @@ export default function PatientDashboard() {
   ];
 
   const fetchDepartmentData = useCallback(async () => {
+    const cachedDepartmentData = loadCachedDepartmentData();
+    if(cachedDepartmentData) {
+      setDepartmentStatus(cachedDepartmentData);
+      return;
+    }
     const response = await fetch('/api/department', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -586,6 +610,9 @@ export default function PatientDashboard() {
       },
       lastUpdated: new Date().toISOString()
     } as DepartmentStatus;
+    if(!departmentData.status) {
+      departmentData.status = JSON.parse(await generateDepartmentBusynessDescriptor(departmentData));
+    }
     setDepartmentStatus(departmentData);
     localStorage.setItem(LOCAL_STORAGE_KEYS.DEPARTMENT_BUSYNESS_DATA, JSON.stringify(departmentData));
   }, [patientData?.department]);
@@ -621,6 +648,25 @@ export default function PatientDashboard() {
     }
   }, [fetchDepartmentData, patientData?.department]);
 
+  const generateDepartmentBusynessDescriptor = async (departmentContext: DepartmentStatus) => {
+      try {
+        const response = await fetch('/api/ai-insights', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'department-busyness-summarizer',
+            patientId: patientId,
+            context: departmentContext
+          })
+        });
+        const res = await response.json();
+        console.log(res);
+        return res.insight;
+      } catch (error) {
+        console.error('Error generating department busyness descriptor:', error);
+      }
+    }
+
   const generateInsight = async (type: string) => {
     setLoadingInsightType(type);
     try {
@@ -633,7 +679,11 @@ export default function PatientDashboard() {
         vitals: 'Stable, improving oxygen saturation',
         occupancy: departmentStatus?.occupancy,
         waitTime: departmentStatus?.waitTime,
-        staffCount: departmentStatus?.staffCount
+        staffCount: departmentStatus?.staffCount,
+        staffOnDuty: departmentStatus?.staffOnDuty,
+        currentPatients: departmentStatus?.currentPatients,
+        availableBeds: departmentStatus?.availableBeds,
+        totalBeds: departmentStatus?.totalBeds
       };
 
       const response = await fetch('/api/ai-insights', {

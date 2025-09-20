@@ -80,6 +80,7 @@ Department Status Information:
   - Nurses: ${departmentContext.staffOnDuty?.nurses}
   - Support Staff: ${departmentContext.staffOnDuty?.support}
 - Last Updated: ${departmentContext.lastUpdated}
+- Status: ${departmentContext.status}
 
 The patient is currently viewing their dashboard and may have questions about department busyness, wait times, staffing levels, or when they might receive attention. 
 ` : '';
