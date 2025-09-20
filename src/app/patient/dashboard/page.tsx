@@ -68,6 +68,7 @@ interface PatientData {
   medicalRecordNumber: string;
   diagnosis: string;
   admissionDate: string;
+  lengthOfStay: number;
   department: string;
   physician: string;
   roomNumber: string;
@@ -236,11 +237,11 @@ const PhysicianSection = ({ patientData }: { patientData: PatientData | null }) 
 
       const parsedArray = JSON.parse(jsonString || '[]');
       
-      consults = parsedArray.map((item: ProviderNote) => ({
+      consults = parsedArray.map((item: ProviderNote, index: number) => ({
         id: `${item.department}-${item.provider}`,
         department: item.department,
         physician: item.provider,
-        status: ['active', 'pending', 'completed'][Math.floor(Math.random() * 3)],
+        status: ['active', 'completed', 'completed'][index % 3],
         lastUpdate: new Date().toLocaleString(),
         notes: item.notes
       }));
@@ -384,7 +385,8 @@ export default function PatientDashboard() {
         age: '25',
         medicalRecordNumber: 'MRN-2024-001',
         diagnosis: 'Acute Bronchitis',
-        admissionDate: '2024-01-15',
+        admissionDate: new Date('2024-01-15').toLocaleString(),
+        lengthOfStay: 10,
         department: 'Respiratory Care',
         physician: 'Dr. Sarah Johnson',
         roomNumber: '302-A',
@@ -412,7 +414,8 @@ export default function PatientDashboard() {
         status__c: 'treatmentStatus',
         physician__c: 'physician',
         provider_notes__c: 'providerNotes',
-        patient_treatment_progress__c: 'treatmentProgress'
+        patient_treatment_progress__c: 'treatmentProgress',
+        length_of_stay__c: 'lengthOfStay'
       }
 
       const treatmentProgressStepConversion = {
@@ -453,6 +456,9 @@ export default function PatientDashboard() {
         }
         else if(field === fieldConversion.provider_notes__c) {
           mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index].map((item: string) => JSON.parse(item));
+        }
+        else if(field === fieldConversion.admission_date__c) {
+          mappedData[fieldConversion[field] as keyof PatientData] = new Date(res?.data[0][index]).toLocaleString() as never;
         }
         else {
           mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
@@ -705,7 +711,7 @@ export default function PatientDashboard() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Admission Date</p>
-                <p className="font-medium">{new Date(patientData?.admissionDate || '').toLocaleDateString()}</p>
+                <p className="font-medium">{patientData?.admissionDate}</p>
               </div>
             </div>
           </CardContent>
@@ -834,7 +840,7 @@ export default function PatientDashboard() {
                     {patientData?.treatmentStatus}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    Day {Math.ceil((new Date().getTime() - new Date(patientData?.admissionDate || '').getTime()) / (1000 * 3600 * 24))} of treatment
+                    Day {patientData?.lengthOfStay?.toString().replace(" days", "")} of treatment
                   </span>
                 </div>
               </div>

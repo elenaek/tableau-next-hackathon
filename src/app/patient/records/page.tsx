@@ -470,7 +470,7 @@ export default function MedicalRecordsPage() {
                     {/* AI Explanation Section */}
                     <div className="border-t pt-4">
                       <Button
-                        className="w-full cursor-pointer active:scale-98"
+                        className={`w-full cursor-pointer active:scale-98 ${!isLoadingExplanation && showExplanation ? 'hidden' : ''}`}
                         size="sm"
                         onClick={() => getAIExplanation(selectedRecord)}
                         disabled={isLoadingExplanation}
@@ -501,20 +501,19 @@ export default function MedicalRecordsPage() {
                           </div>
                           <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                             <div className="prose prose-sm dark:prose-invert max-w-none">
-                            <Markdown remarkPlugins={[remarkGfm]}
-                              components={{
-                                h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
-                                h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
-                                h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
-                                p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
-                                ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
-                                ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
-                                li: ({ children }) => <li className="mb-1">{children}</li>,
-                              }}
-                            >
-                              {aiExplanation}
-                          </Markdown>
-                              {/* <div dangerouslySetInnerHTML={{ __html: aiExplanation.replace(/\n/g, '<br />') }} /> */}
+                              <Markdown remarkPlugins={[remarkGfm]}
+                                components={{
+                                  h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
+                                  h2: ({ children }) => <h2 className="mb-2 last:mb-0 text-lg font-semibold">{children}</h2>,
+                                  h3: ({ children }) => <h3 className="mb-2 last:mb-0 text-base font-semibold">{children}</h3>,
+                                  p: ({ children }) => <p className="mb-2 last:mb-0 text-sm">{children}</p>,
+                                  ul: ({ children }) => <ul className="mb-2 ml-4 list-disc last:mb-0 text-sm">{children}</ul>,
+                                  ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal last:mb-0 text-sm">{children}</ol>,
+                                  li: ({ children }) => <li className="mb-1">{children}</li>,
+                                }}
+                              >
+                                {aiExplanation}
+                              </Markdown>
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground italic">
