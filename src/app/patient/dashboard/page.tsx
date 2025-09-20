@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import { AIDisclaimer } from '@/components/AIDisclaimer';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { Sparkles } from '@/components/ui/sparkles';
+import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 // import { FloatingNotification } from '@/components/ui/floating-notification';
 
 interface ProviderNote {
@@ -338,6 +339,135 @@ export default function PatientDashboard() {
   const patientId = 'P8045221';
   // const patientId = 'patient-123';
 
+  const loadCachedPatientData = useCallback((): PatientData | null => {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE);
+      if (cached) {
+        const parsedData = JSON.parse(cached);
+        // Verify it's for the same patient
+        if (parsedData.id === patientId) {
+          console.log('Loading patient data from cache');
+          return parsedData;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached data:', error);
+    }
+    return null;
+  }, [patientId]);
+
+  const cachePatientData = useCallback((data: PatientData) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE, JSON.stringify(data));
+      console.log('Patient data cached successfully');
+    } catch (error) {
+      console.error('Error caching patient data:', error);
+    }
+  }, []);
+
+  const fetchPatientData = useCallback(async () => {
+    try {
+      const mockData: PatientData = {
+        id: patientId,
+        name: 'John Doe',
+        age: '25',
+        medicalRecordNumber: 'MRN-2024-001',
+        diagnosis: 'Acute Bronchitis',
+        admissionDate: '2024-01-15',
+        department: 'Respiratory Care',
+        physician: 'Dr. Sarah Johnson',
+        roomNumber: '302-A',
+        treatmentStatus: 'In Progress',
+        isMock: true
+      };
+
+      const patientData = await fetch(`/api/patient`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId,
+          sql: `SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'`
+        })
+      });
+
+      const fieldConversion: Record<string, string> = {
+        patient_id__c: 'id',
+        patient_name__c: 'name',
+        patient_mrn__c: 'medicalRecordNumber',
+        diagnosis__c: 'diagnosis',
+        patient_age__c: 'age',
+        room_number__c: 'roomNumber',
+        department__c: 'department',
+        admission_date__c: 'admissionDate',
+        status__c: 'treatmentStatus',
+        physician__c: 'physician',
+        provider_notes__c: 'providerNotes',
+        patient_treatment_progress__c: 'treatmentProgress'
+      }
+
+      const treatmentProgressStepConversion = {
+        admission: 'Admission',
+        initial_assessment: 'Initial Assessment',
+        treatment: 'Treatment',
+        recovery: 'Recovery',
+        discharge_planning: 'Discharge Planning',
+        discharge: 'Discharge'
+      }
+
+      const res = await patientData.json();
+      const mappedData: Partial<PatientData> = {
+        isMock: false
+      };
+      Object.keys(res?.metadata).forEach((field: string, index: number) => {
+        if(field === "patient_treatment_progress__c") {
+          const decodedTreatmentProgress = decodeHtmlEntities(res?.data[0][index]);
+          const jsonTreatmentProgress = decodedTreatmentProgress?.replace(/'/g, '"');
+          const parsedTreatmentProgress: Record<string, TreatmentProgressItem[] | TreatmentProgressStep> = JSON.parse(jsonTreatmentProgress || '{}');
+          const treatmentProgress: ProgressStep[] = [];
+          Object.keys(parsedTreatmentProgress).forEach((key: string) => {
+            const progressData = parsedTreatmentProgress[key];
+            const items = Array.isArray(progressData) ? progressData : progressData.items || [];
+
+            treatmentProgress.push({
+              step: treatmentProgressStepConversion[key as keyof typeof treatmentProgressStepConversion],
+              isCompleted: items.filter((item) => !item.completed).length === 0,
+              isActive: false,
+              subSteps: items.map((item: TreatmentProgressItem) => ({
+                task: item.node_label,
+                status: item.completed === true ? 'completed' : 'pending',
+                time: item.timestamp ? new Date(Date.parse(item.timestamp)).toLocaleString() : ''
+              }))
+            })
+          })
+          mappedData[fieldConversion[field] as keyof PatientData] = treatmentProgress as never;
+        }
+        else if(field === fieldConversion.provider_notes__c) {
+          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index].map((item: string) => JSON.parse(item));
+        }
+        else {
+          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
+        }
+      });
+
+      const finalData = Object.keys(mappedData)?.length > 0 ? mappedData as PatientData : mockData;
+      setPatientData(finalData);
+      cachePatientData(finalData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching patient data:', error);
+      // Try to use cached data on error
+      const cachedData = loadCachedPatientData();
+      if (cachedData) {
+        setPatientData(cachedData);
+      }
+      setLoading(false);
+    }
+  }, [patientId, cachePatientData, loadCachedPatientData]);
+
   const progressSteps: ProgressStep[] = [
     {
       step: "Admission",
@@ -407,101 +537,28 @@ export default function PatientDashboard() {
   ];
 
   useEffect(() => {
-    fetchPatientData();
-  }, []);
-
-
-  const fetchPatientData = async () => {
-    try {
-      const mockData: PatientData = {
-        id: patientId,
-        name: 'John Doe',
-        age: '25',
-        medicalRecordNumber: 'MRN-2024-001',
-        diagnosis: 'Acute Bronchitis',
-        admissionDate: '2024-01-15',
-        department: 'Respiratory Care',
-        physician: 'Dr. Sarah Johnson',
-        roomNumber: '302-A',
-        treatmentStatus: 'In Progress',
-        isMock: true
-      };
-
-      const patientData = await fetch(`/api/patient`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientId,
-          sql: `SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'`
-        })
-      });
-
-      const fieldConversion: Record<string, string> = {
-        patient_id__c: 'id',
-        patient_name__c: 'name',
-        patient_mrn__c: 'medicalRecordNumber',
-        diagnosis__c: 'diagnosis',
-        patient_age__c: 'age',
-        room_number__c: 'roomNumber',
-        department__c: 'department',
-        admission_date__c: 'admissionDate',
-        status__c: 'treatmentStatus',
-        physician__c: 'physician',
-        provider_notes__c: 'providerNotes',
-        patient_treatment_progress__c: 'treatmentProgress'
+    // Clear cache on page refresh/unload
+    const handleBeforeUnload = () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE);
       }
+    };
 
-      const treatmentProgressStepConversion = {
-        admission: 'Admission',
-        initial_assessment: 'Initial Assessment',
-        treatment: 'Treatment',
-        recovery: 'Recovery',
-        discharge_planning: 'Discharge Planning',
-        discharge: 'Discharge'
-      }
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
-      const res = await patientData.json();
-      const mappedData: Partial<PatientData> = {
-        isMock: false
-      };
-      Object.keys(res?.metadata).forEach((field: string, index: number) => {
-        if(field === "patient_treatment_progress__c") {
-          const decodedTreatmentProgress = decodeHtmlEntities(res?.data[0][index]);
-          const jsonTreatmentProgress = decodedTreatmentProgress?.replace(/'/g, '"');
-          const parsedTreatmentProgress: Record<string, TreatmentProgressItem[] | TreatmentProgressStep> = JSON.parse(jsonTreatmentProgress || '{}');
-          const treatmentProgress: ProgressStep[] = [];
-          Object.keys(parsedTreatmentProgress).forEach((key: string) => {
-            const progressData = parsedTreatmentProgress[key];
-            const items = Array.isArray(progressData) ? progressData : progressData.items || [];
-            
-            treatmentProgress.push({
-              step: treatmentProgressStepConversion[key as keyof typeof treatmentProgressStepConversion],
-              isCompleted: items.filter((item) => !item.completed).length === 0,
-              isActive: false,
-              subSteps: items.map((item: TreatmentProgressItem) => ({
-                task: item.node_label,
-                status: item.completed === true ? 'completed' : 'pending',
-                time: item.timestamp ? new Date(Date.parse(item.timestamp)).toLocaleString() : ''
-              }))
-            })
-          })
-          mappedData[fieldConversion[field] as keyof PatientData] = treatmentProgress as never;
-        } 
-        else if(field === fieldConversion.provider_notes__c) {
-          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index].map((item: string) => JSON.parse(item));
-        }
-        else {
-          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
-        }
-      });
-
-      setPatientData(Object.keys(mappedData)?.length > 0 ? mappedData as PatientData : mockData);
+    // Check for cached data first
+    const cachedData = loadCachedPatientData();
+    if (cachedData) {
+      setPatientData(cachedData);
       setLoading(false);
-    } catch (error) {
-      console.error('Error fetching patient data:', error);
-      setLoading(false);
+    } else {
+      fetchPatientData();
     }
-  };
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [fetchPatientData, loadCachedPatientData]);
 
   const generateInsight = async (type: string) => {
     setLoadingInsightType(type);
@@ -588,7 +645,7 @@ export default function PatientDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 text-blue-400" />
               Patient Information
             </CardTitle>
           </CardHeader>
@@ -649,7 +706,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+                <TrendingUp className="w-5 h-5 text-green-800" />
                 Treatment Progress
               </CardTitle>
               <CardDescription>Your recovery journey step by step</CardDescription>
@@ -678,7 +735,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5" />
+                <Activity className="w-5 h-5 text-pink-700" />
                 Progress Insights
               </CardTitle>
               <CardDescription>AI-powered analysis of your recovery</CardDescription>
@@ -714,7 +771,7 @@ export default function PatientDashboard() {
                   onClick={() => generateInsight('treatment-progress')}
                   disabled={loadingInsightType !== null}
                   variant="outline"
-                  className="w-full cursor-pointer bg-gradient-to-r from-pink-100 to-pink-200 hover:from-pink-200 hover:to-pink-300 active:scale-98"
+                  className="w-full cursor-pointer bg-gradient-to-r from-purple-100 to-purple-200 hover:from-purple-200 hover:to-purple-300 active:scale-98"
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   Get Progress Update
@@ -793,7 +850,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Hospital className="w-5 h-5" />
+                <Hospital className="w-5 h-5 text-red-600" />
                 Department Status
               </CardTitle>
               <CardDescription>Current activity in {patientData?.department}</CardDescription>
@@ -848,7 +905,7 @@ export default function PatientDashboard() {
                   onClick={() => generateInsight('department-busyness')}
                   disabled={loadingInsightType !== null}
                   variant="outline"
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer bg-gradient-to-r from-red-300 to-red-400 hover:from-red-400 hover:to-red-500 active:scale-98"
                 >
                   <Info className="w-4 h-4 mr-2" />
                   Explain Department Status
