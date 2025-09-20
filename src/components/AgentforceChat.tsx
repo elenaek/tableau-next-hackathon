@@ -14,7 +14,8 @@ import {
   Bot,
   User,
   Loader2,
-  Trash2
+  Trash2,
+  Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/app/context/ChatContext';
@@ -259,7 +260,7 @@ export function AgentforceChat() {
                               className={cn(
                                 "max-w-[75%] rounded-lg px-4 py-2",
                                 message.role === 'user'
-                                  ? "bg-blue-600 text-white"
+                                  ? "bg-blue-500 text-white"
                                   : "bg-indigo-100 text-foreground"
                               )}
                             >
@@ -284,8 +285,8 @@ export function AgentforceChat() {
                               </p>
                             </div>
                             {message.role === 'user' && (
-                              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                <User className="h-4 w-4 text-green-600" />
+                              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <User className="h-4 w-4 text-blue-600" />
                               </div>
                             )}
                           </div>
@@ -300,6 +301,16 @@ export function AgentforceChat() {
                             </div>
                           </div>
                         )}
+                      </div>
+                    </div>
+
+                    {/* AI Disclaimer */}
+                    <div className="px-3 py-1 bg-gray-50/50 dark:bg-gray-900/50">
+                      <div className="flex items-start gap-1.5">
+                        <Info className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed italic">
+                          AI responses may contain inaccuracies. Always double-check and consult your healthcare team for medical advice.
+                        </p>
                       </div>
                     </div>
 
