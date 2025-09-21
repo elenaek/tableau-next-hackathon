@@ -25,8 +25,8 @@ export const AnimatedChatCard = ({
     mouseY.set(y);
   };
 
-  const background = useMotionTemplate`radial-gradient(150px circle at ${mouseX}px ${mouseY}px, rgba(236, 72, 153, 0.15), transparent 50%)`;
-  const borderGradient = useMotionTemplate`radial-gradient(180px circle at ${mouseX}px ${mouseY}px, rgba(236, 72, 153, 0.3), rgba(99, 102, 241, 0.15) 40%, transparent 60%)`;
+  const background = useMotionTemplate`radial-gradient(150px circle at ${mouseX}px ${mouseY}px, rgba(96, 165, 250, 0.2), transparent 50%)`;
+  const borderGradient = useMotionTemplate`radial-gradient(180px circle at ${mouseX}px ${mouseY}px, rgba(147, 197, 253, 0.4), rgba(59, 130, 246, 0.2) 40%, transparent 60%)`;
 
   return (
     <div

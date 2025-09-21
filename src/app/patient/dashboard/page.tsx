@@ -988,22 +988,22 @@ export default function PatientDashboard() {
 
                 {/* Wait Times Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200">
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-red-600" />
-                      <span className="text-xs text-red-600 font-medium">High Risk Cases</span>
+                      <Clock className="w-3 h-3 text-amber-600" />
+                      <span className="text-xs text-amber-700 font-medium">High Risk Cases</span>
                     </div>
-                    <p className="text-xl font-bold mt-1 text-red-800 dark:text-red-300">
+                    <p className="text-xl font-bold mt-1 text-amber-700 dark:text-amber-300">
                       {Math.max(5, Math.round((departmentStatus?.waitTime || 0) * 0.3))} min
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Priority queue</p>
                   </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900">
+                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
                     <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-blue-600" />
-                      <span className="text-xs text-blue-600 font-medium">Normal Cases</span>
+                      <Clock className="w-3 h-3 text-green-600" />
+                      <span className="text-xs text-green-600 font-medium">Normal Cases</span>
                     </div>
-                    <p className="text-xl font-bold mt-1 text-blue-800 dark:text-blue-300">
+                    <p className="text-xl font-bold mt-1 text-green-800 dark:text-green-300">
                       {Math.round((departmentStatus.waitTime || 0) * 1.2)} min
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Standard queue</p>
