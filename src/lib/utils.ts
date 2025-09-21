@@ -18,5 +18,5 @@ export const LOCAL_STORAGE_KEYS = {
 
 export function decodeHtmlEntities(htmlString: string) {
   const doc = new DOMParser().parseFromString(htmlString, 'text/html');
-  return doc.documentElement.textContent;
+  return doc.body?.innerText;
 }

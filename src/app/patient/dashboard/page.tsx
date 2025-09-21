@@ -38,6 +38,7 @@ interface ProviderNote {
   department: string;
   provider: string;
   notes: string;
+  timestamp?: string;
 }
 
 interface TreatmentProgressItem {
@@ -240,19 +241,17 @@ const PhysicianSection = ({ patientData }: { patientData: PatientData | null }) 
 
   if(patientData?.providerNotes && typeof patientData.providerNotes === 'string'){
     try {
-      const decodedString = decodeHtmlEntities(patientData.providerNotes);
-      const jsonString = decodedString?.replace(/'/g, '"');
-
-      const parsedArray = JSON.parse(jsonString || '[]');
+      const parsedArray = JSON.parse(patientData.providerNotes || '[]');
       
-      consults = parsedArray.map((item: ProviderNote, index: number) => ({
+      consults = parsedArray.map((item: ProviderNote, index: number) => {
+        return {
         id: `${item.department}-${item.provider}`,
         department: item.department,
         physician: item.provider,
         status: ['active', 'completed', 'completed'][index % 3],
-        lastUpdate: new Date().toLocaleString(),
+        lastUpdate: new Date(item.timestamp || new Date().toISOString()).toLocaleString() || "N/A",
         notes: item.notes
-      }));
+      }});
     } catch (error) {
       console.error('Error parsing provider notes:', error);
     }
@@ -484,13 +483,15 @@ export default function PatientDashboard() {
           })
           mappedData[fieldConversion[field] as keyof PatientData] = treatmentProgress as never;
         }
-        else if(field === fieldConversion.provider_notes__c) {
-          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index].map((item: string) => JSON.parse(item));
+        else if(field == "provider_notes__c") {
+          const decodedItem = decodeHtmlEntities(res?.data[0][index]);
+          const jsonItem = decodedItem?.replace(/'/g, '"');
+          mappedData[fieldConversion[field] as keyof PatientData] = jsonItem as never;
         }
-        else if(field === fieldConversion.admission_date__c) {
-          mappedData[fieldConversion[field] as keyof PatientData] = new Date(res?.data[0][index]).toLocaleString() as never;
+        else if(field === "admission_date__c") {
+          mappedData[fieldConversion[field] as keyof PatientData] = res?.data[0][index];
         }
-        else if(field === fieldConversion.patient_gender__c) {
+        else if(field === "patient_gender__c") {
           mappedData[fieldConversion[field] as keyof PatientData] = (res?.data[0][index] == 'M' ? 'Male' : 'Female') as never;
         }
         else {
@@ -918,7 +919,7 @@ export default function PatientDashboard() {
                     {patientData?.treatmentStatus}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
-                    Day {patientData?.lengthOfStay} of treatment
+                    On day {patientData?.lengthOfStay} of treatment
                   </span>
                 </div>
               </div>

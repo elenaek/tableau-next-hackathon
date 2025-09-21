@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-
+    // console.log("prompt: " + prompt);
     const aiResponse = await client.callAgentforceModel(prompt);
 
     return NextResponse.json({
