@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { AnimatedChatCard } from '@/components/ui/animated-chat-card';
 import {
   MessageSquare,
+  MessageSquareHeart,
   X,
   Minimize2,
   Maximize2,
@@ -161,11 +162,11 @@ export function AgentforceChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="cursor-pointer rounded-l-lg rounded-r-none h-32 px-3 py-1 bg-indigo-500 hover:bg-indigo-900 text-white shadow-lg hover:scale-102 active:scale-98"
+              className="cursor-pointer rounded-l-lg rounded-r-none h-36 px-3 py-1 bg-indigo-500 hover:bg-indigo-900 text-white shadow-lg hover:scale-102 active:scale-98"
               size="lg"
             >
               <div className="flex flex-col items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
+                <MessageSquareHeart className="h-5 w-5" />
                 <span className="text-xs font-medium writing-mode-vertical pb-1">Agentforce Chat</span>
               </div>
             </Button>
@@ -202,7 +203,7 @@ export function AgentforceChat() {
               <Card className="w-full h-full flex flex-col border relative rounded-xl">
                 {/* Header */}
                 <div className={cn(
-                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-purple-50 to-indigo-50",
+                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-purple-50 to-indigo-100",
                   isMinimized ? "rounded-xl border" : "rounded-t-xl border-b"
                 )}>
                   <div className="flex items-center gap-2">
@@ -334,7 +335,7 @@ export function AgentforceChat() {
                           onFocus={() => setIsFocused(true)}
                           onBlur={() => setIsFocused(false)}
                           placeholder="Ask about your medical records, treatment, or health..."
-                          className="flex-1 resize-none p-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                          className="flex-1 resize-none p-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-200"
                           disabled={isLoading}
                         />
                         <Button
