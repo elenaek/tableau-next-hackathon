@@ -154,7 +154,8 @@ export class SalesforceClient {
   }
 
   async callAgentforceModel(prompt: string): Promise<unknown> {
-    const url = `https://api.salesforce.com/einstein/platform/v1/models/sfdc_ai__DefaultGPT35Turbo/generations`;
+    const modelName = process.env.SALESFORCE_AI_INSIGHTS_MODEL || 'sfdc_ai__DefaultGPT35Turbo';
+    const url = `https://api.salesforce.com/einstein/platform/v1/models/${modelName}/generations`;
 
     const response = await this.makeAuthenticatedRequest(url, {
       method: 'POST',
