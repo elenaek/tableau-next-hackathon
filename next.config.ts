@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  env: {
-    TNEXT_PATIENT_USERNAME: process.env.TNEXT_PATIENT_USERNAME,
-    TNEXT_PATIENT_PW: process.env.TNEXT_PATIENT_PW,
-  }
+  // Authentication credentials removed from client-side for security
+  // These are now handled server-side only through API routes
 };
 
 export default nextConfig;

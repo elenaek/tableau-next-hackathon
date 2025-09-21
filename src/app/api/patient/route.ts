@@ -10,10 +10,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
     }
 
+    // Validate patientId to prevent SQL injection
+    // Only allow alphanumeric characters and hyphens
+    if (!/^[a-zA-Z0-9-]+$/.test(patientId)) {
+      return NextResponse.json({ error: 'Invalid patient ID format' }, { status: 400 });
+    }
+
     const client = getSalesforceClient();
 
+    // Using escaped patientId - Salesforce SOQL automatically escapes single quotes when using String.escapeSingleQuotes()
+    // In a production environment, use parameterized queries if available
+    const escapedPatientId = patientId.replace(/'/g, "\\'");
     const patientData = await client.query(`
-      SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${patientId}'
+      SELECT * FROM hospital_patient_snaps19204202568__dll where patient_id__c = '${escapedPatientId}'
     `);
 
     return NextResponse.json(patientData);
@@ -38,11 +47,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate patientId to prevent SQL injection
+    // Only allow alphanumeric characters and hyphens
+    if (!/^[a-zA-Z0-9-]+$/.test(patientId)) {
+      return NextResponse.json({ error: 'Invalid patient ID format' }, { status: 400 });
+    }
+
     const client = getSalesforceClient();
+
+    // Using escaped patientId - Salesforce SOQL automatically escapes single quotes when using String.escapeSingleQuotes()
+    // In a production environment, use parameterized queries if available
+    const escapedPatientId = patientId.replace(/'/g, "\\'");
     const patientData = await client.query(`
-      SELECT * FROM hospital_patient_snaps19204202568__dll WHERE patient_id__c = '${patientId}'
+      SELECT * FROM hospital_patient_snaps19204202568__dll WHERE patient_id__c = '${escapedPatientId}'
     `);
-    
+
     return NextResponse.json(patientData);
   } catch (error) {
     console.error('Error processing patient action:', error);

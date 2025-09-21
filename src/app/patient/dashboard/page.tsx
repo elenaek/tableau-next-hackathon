@@ -406,6 +406,7 @@ export default function PatientDashboard() {
 
   const fetchPatientData = useCallback(async () => {
     try {
+      const physician = 'Dr. Sarah Johnson';
       const mockData: PatientData = {
         id: patientId,
         name: 'John Doe',
@@ -416,7 +417,7 @@ export default function PatientDashboard() {
         admissionDate: new Date('2024-01-15').toLocaleString(),
         lengthOfStay: 10,
         department: 'Respiratory Care',
-        physician: 'Dr. Sarah Johnson',
+        physician: physician,
         roomNumber: '302-A',
         treatmentStatus: 'In Progress',
         isMock: true
@@ -499,6 +500,7 @@ export default function PatientDashboard() {
       });
 
       const finalData = Object.keys(mappedData)?.length > 0 ? mappedData as PatientData : mockData;
+      finalData.physician = physician;
       setPatientData(finalData);
       cachePatientData(finalData);
       setLoading(false);

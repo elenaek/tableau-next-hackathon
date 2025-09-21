@@ -5,11 +5,70 @@ export interface AuthState {
 
 export const AUTH_STORAGE_KEY = 'tnext_auth_state';
 
-export function validateCredentials(username: string, password: string): boolean {
-  const validUsername = process.env.NEXT_PUBLIC_PATIENT_USERNAME || process.env.TNEXT_PATIENT_USERNAME;
-  const validPassword = process.env.NEXT_PUBLIC_PATIENT_PW || process.env.TNEXT_PATIENT_PW;
+// Server-side authentication via API
+export async function validateCredentials(username: string, password: string): Promise<{ success: boolean; user?: { username: string } }> {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
 
-  return username === validUsername && password === validPassword;
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false };
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return { success: false };
+  }
+}
+
+// Verify session with server
+export async function verifySession(): Promise<AuthState> {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return { isAuthenticated: false };
+    }
+
+    const data = await response.json();
+    return {
+      isAuthenticated: data.authenticated,
+      username: data.user?.username
+    };
+  } catch (error) {
+    console.error('Session verification error:', error);
+    return { isAuthenticated: false };
+  }
+}
+
+// Logout via API
+export async function logout(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      clearAuthState();
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Logout error:', error);
+    return false;
+  }
 }
 
 export function saveAuthState(authState: AuthState): void {
