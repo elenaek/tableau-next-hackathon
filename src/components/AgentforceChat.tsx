@@ -20,10 +20,12 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/app/context/ChatContext';
+import { useAuth } from '@/app/context/AuthContext';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export function AgentforceChat() {
+  const { authState } = useAuth();
   const {
     isOpen,
     setIsOpen,
@@ -147,6 +149,11 @@ export function AgentforceChat() {
       sendMessage();
     }
   };
+
+  // Don't render the chat if user is not authenticated
+  if (!authState.isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
