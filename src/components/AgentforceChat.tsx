@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AnimatedChatCard } from '@/components/ui/animated-chat-card';
 import {
-  MessageSquare,
   MessageSquareHeart,
   X,
   Minimize2,
@@ -51,10 +50,13 @@ export function AgentforceChat() {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isResizingInput, setIsResizingInput] = useState(false);
+  const [resizeCorner, setResizeCorner] = useState<'tl' | 'tr' | 'bl' | 'br' | null>(null);
 
   const chatRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const resizeStartSize = useRef({ width: 0, height: 0 });
+  const resizeStartPos = useRef({ x: 0, y: 0 });
+  const resizeStartMouse = useRef({ x: 0, y: 0 });
   const inputResizeStartHeight = useRef(0);
   const inputResizeStartY = useRef(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -92,17 +94,47 @@ export function AgentforceChat() {
       const newY = Math.max(0, Math.min(window.innerHeight - size.height, e.clientY - dragStartPos.current.y));
       setPosition({ x: newX, y: newY });
     }
-    if (isResizing) {
-      const newWidth = Math.max(300, Math.min(window.innerWidth - position.x - 20, e.clientX - position.x));
-      const newHeight = Math.max(400, Math.min(window.innerHeight - position.y - 50, e.clientY - position.y));
+    if (isResizing && resizeCorner) {
+      const deltaX = e.clientX - resizeStartMouse.current.x;
+      const deltaY = e.clientY - resizeStartMouse.current.y;
+
+      let newWidth = resizeStartSize.current.width;
+      let newHeight = resizeStartSize.current.height;
+      let newX = resizeStartPos.current.x;
+      let newY = resizeStartPos.current.y;
+
+      switch (resizeCorner) {
+        case 'br': // Bottom-right
+          newWidth = Math.max(300, Math.min(window.innerWidth - position.x - 20, resizeStartSize.current.width + deltaX));
+          newHeight = Math.max(400, Math.min(window.innerHeight - position.y - 50, resizeStartSize.current.height + deltaY));
+          break;
+        case 'bl': // Bottom-left
+          newWidth = Math.max(300, Math.min(resizeStartPos.current.x + resizeStartSize.current.width, resizeStartSize.current.width - deltaX));
+          newHeight = Math.max(400, Math.min(window.innerHeight - position.y - 50, resizeStartSize.current.height + deltaY));
+          newX = Math.max(0, resizeStartPos.current.x + deltaX);
+          break;
+        case 'tr': // Top-right
+          newWidth = Math.max(300, Math.min(window.innerWidth - position.x - 20, resizeStartSize.current.width + deltaX));
+          newHeight = Math.max(400, Math.min(resizeStartPos.current.y + resizeStartSize.current.height, resizeStartSize.current.height - deltaY));
+          newY = Math.max(0, resizeStartPos.current.y + deltaY);
+          break;
+        case 'tl': // Top-left
+          newWidth = Math.max(300, Math.min(resizeStartPos.current.x + resizeStartSize.current.width, resizeStartSize.current.width - deltaX));
+          newHeight = Math.max(400, Math.min(resizeStartPos.current.y + resizeStartSize.current.height, resizeStartSize.current.height - deltaY));
+          newX = Math.max(0, resizeStartPos.current.x + deltaX);
+          newY = Math.max(0, resizeStartPos.current.y + deltaY);
+          break;
+      }
+
       setSize({ width: newWidth, height: newHeight });
+      setPosition({ x: newX, y: newY });
     }
     if (isResizingInput) {
       const deltaY = inputResizeStartY.current - e.clientY;
       const newHeight = Math.max(60, Math.min(300, inputResizeStartHeight.current + deltaY));
       setInputHeight(newHeight);
     }
-  }, [isDragging, isResizing, isResizingInput, position, size.width, size.height, setPosition, setSize, setInputHeight]);
+  }, [isDragging, isResizing, isResizingInput, position, resizeCorner, setPosition, setSize, setInputHeight]);
 
   const handleMouseUp = useCallback(() => {
     // Save position and size when user releases the mouse
@@ -112,6 +144,7 @@ export function AgentforceChat() {
     setIsDragging(false);
     setIsResizing(false);
     setIsResizingInput(false);
+    setResizeCorner(null);
   }, [isDragging, isResizing, isResizingInput, savePositionAndSize]);
 
   // Set up global mouse event listeners
@@ -127,11 +160,14 @@ export function AgentforceChat() {
   }, [isDragging, isResizing, isResizingInput, handleMouseMove, handleMouseUp]);
 
   // Handle resize
-  const handleResizeStart = (e: React.MouseEvent) => {
+  const handleResizeStart = (corner: 'tl' | 'tr' | 'bl' | 'br') => (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     setIsResizing(true);
+    setResizeCorner(corner);
     resizeStartSize.current = { width: size.width, height: size.height };
+    resizeStartPos.current = { x: position.x, y: position.y };
+    resizeStartMouse.current = { x: e.clientX, y: e.clientY };
   };
 
   // Handle input resize
@@ -210,9 +246,23 @@ export function AgentforceChat() {
               <Card className="w-full h-full flex flex-col border relative rounded-xl">
                 {/* Header */}
                 <div className={cn(
-                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-purple-50 to-indigo-100",
+                  "drag-handle flex items-center justify-between p-2 cursor-move bg-gradient-to-r from-purple-50 to-indigo-100 relative",
                   isMinimized ? "rounded-xl border" : "rounded-t-xl border-b"
                 )}>
+                  {/* Top resize handles - in header */}
+                  {/* Top-left */}
+                  <div
+                    className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize z-50"
+                    onMouseDown={handleResizeStart('tl')}
+                    style={{ touchAction: 'none' }}
+                  />
+                  {/* Top-right */}
+                  <div
+                    className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize z-50"
+                    onMouseDown={handleResizeStart('tr')}
+                    style={{ touchAction: 'none' }}
+                  />
+
                   <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-pink-400"/>
                     <h3 className="font-semibold text-sm">Agentforce Health Assistant</h3>
@@ -356,14 +406,19 @@ export function AgentforceChat() {
                       </div>
                     </div>
 
-                    {/* Resize Handle */}
+                    {/* Bottom Resize Handles - in content area */}
+                    {/* Bottom-left */}
                     <div
-                      className="absolute bottom-0 right-0 w-6 h-6 cursor-se-resize z-50 hover:bg-gray-200/50"
-                      onMouseDown={handleResizeStart}
+                      className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize z-50"
+                      onMouseDown={handleResizeStart('bl')}
                       style={{ touchAction: 'none' }}
-                    >
-                      <div className="absolute bottom-1 right-1 w-3 h-3 border-r-2 border-b-2 border-gray-500" />
-                    </div>
+                    />
+                    {/* Bottom-right */}
+                    <div
+                      className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50"
+                      onMouseDown={handleResizeStart('br')}
+                      style={{ touchAction: 'none' }}
+                    />
                   </div>
                 )}
               </Card>
