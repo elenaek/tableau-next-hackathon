@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // const parsedProviderNotes = JSON.parse(jsonProviderNotes || '[]');
+
     const client = getSalesforceClient();
 
     // Build messages array for the chat API
@@ -31,10 +33,9 @@ Patient Information:
 - Length of Stay: ${patientContext.lengthOfStay}
 - Physician: ${patientContext.physician}
 - Room Number: ${patientContext.roomNumber}
-- Treatment Progress: ${patientContext.treatmentProgress}
+- Treatment Progress: ${JSON.stringify(patientContext.treatmentProgress)}
 - Provider Notes: ${patientContext.providerNotes}
 ` : '';
-
 
     // Add medical records context if on records page
     const recordsInfo = medicalRecordsContext ? `
@@ -132,7 +133,7 @@ Remember: You are here to help the patient understand their care better, not to 
       content: message
     });
 
-    console.log(systemMessage);
+    // console.log(systemMessage);
 
     // Call the new generateChat method
     const aiResponse = await client.generateChat(messages);

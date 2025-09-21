@@ -15,3 +15,8 @@ export const LOCAL_STORAGE_KEYS = {
   VITALS_DATA: 'vitalsData',
   DEPARTMENT_BUSYNESS_DATA: 'departmentBusynessData',
 }
+
+export function decodeHtmlEntities(htmlString: string) {
+  const doc = new DOMParser().parseFromString(htmlString, 'text/html');
+  return doc.documentElement.textContent;
+}

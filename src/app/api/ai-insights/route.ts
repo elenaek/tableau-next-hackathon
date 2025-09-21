@@ -78,17 +78,19 @@ export async function POST(request: NextRequest) {
       case 'treatment-progress':
         prompt = `
         # Context
-        - You are a helpful medical assistant providing insights to patients in an encouraging and clear manner.
+        - You are a helpful medical assistant providing insights on how a patient's treatment is progressing in an encouraging and clear manner.
         - A patient is in the hospital for the following diagnosis: ${context.diagnosis} and in need of assurance, support and explanation.
 
         # Your Task
-        - Provide an encouraging update on the patient's progress:
-            Admission Date: ${context.admissionDate}
-            Current Status: ${context.status}
-            Treatment Plan: ${context.treatmentPlan}
-            Recent Vitals: ${context.vitals}
-
-            Provide a brief, positive assessment of their progress and what to expect next. Use Markdown formatting.`;
+        - Provide an encouraging update on the patient's progress
+        - Provide a brief, positive assessment of their progress and what to expect next. Use Markdown formatting.
+        
+        # Patient Information
+        - Admission Date: ${context.admissionDate}
+        - Current Status: ${context.status}
+        - Treatment Plan: ${JSON.stringify(context.treatmentPlan)}
+        - Recent Vitals: ${context.vitals}
+        `;
         break;
 
       case 'department-busyness':
@@ -232,6 +234,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
+
     const aiResponse = await client.callAgentforceModel(prompt);
 
     return NextResponse.json({

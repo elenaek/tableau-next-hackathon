@@ -30,8 +30,9 @@ import { AIDisclaimer } from '@/components/AIDisclaimer';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { Sparkles } from '@/components/ui/sparkles';
-import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
+import { LOCAL_STORAGE_KEYS, decodeHtmlEntities } from '@/lib/utils';
 // import { FloatingNotification } from '@/components/ui/floating-notification';
+
 
 interface ProviderNote {
   department: string;
@@ -118,10 +119,6 @@ const NotesPopover = ({ title, notes }: { title: string; notes: string }) => (
   </Popover>
 );
 
-function decodeHtmlEntities(htmlString: string) {
-  const doc = new DOMParser().parseFromString(htmlString, 'text/html');
-  return doc.documentElement.textContent;
-}
 
 const ExpandableProgressStep = ({
   step,
@@ -681,6 +678,7 @@ export default function PatientDashboard() {
         status: patientData?.treatmentStatus,
         department: patientData?.department,
         treatmentPlan: type === 'treatment-progress' ? patientData?.treatmentProgress : 'Antibiotics, respiratory therapy, rest',
+        providerNotes: patientData?.providerNotes,
         vitals: 'Stable, improving oxygen saturation',
         occupancy: departmentStatus?.occupancy,
         waitTime: departmentStatus?.waitTime,
@@ -806,7 +804,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Stethoscope className="w-5 h-5" />
+                <Stethoscope className="w-5 h-5 text-indigo-600" />
                 Your Care Team
               </CardTitle>
               <CardDescription>Physicians managing your care</CardDescription>
@@ -851,7 +849,7 @@ export default function PatientDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-pink-700" />
+                <Activity className="w-5 h-5 text-pink-300" />
                 Progress Insights
               </CardTitle>
               <CardDescription>AI-powered analysis of your recovery</CardDescription>
@@ -951,7 +949,7 @@ export default function PatientDashboard() {
                 <Button
                   onClick={() => generateInsight('diagnosis-explainer')}
                   disabled={loadingInsightType !== null}
-                  className="w-full cursor-pointer bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 active:scale-98"
+                  className="w-full cursor-pointer bg-gradient-to-r from-blue-300 to-blue-400 hover:from-blue-400 hover:to-blue-500 active:scale-98 text-black-50"
                 >
                   <Brain className="w-4 h-4 mr-2" />
                   Explain My Diagnosis
@@ -1062,7 +1060,7 @@ export default function PatientDashboard() {
                     onClick={() => generateInsight('department-busyness')}
                     disabled={loadingInsightType !== null}
                     variant="outline"
-                    className="w-full cursor-pointer bg-gradient-to-r from-red-300 to-red-400 hover:from-red-400 hover:to-red-500 active:scale-98"
+                    className="w-full cursor-pointer bg-gradient-to-r from-indigo-200 to-indigo-300 hover:from-indigo-300 hover:to-indigo-500 active:scale-98"
                   >
                     <Info className="w-4 h-4 mr-2" />
                     Explain Department Status

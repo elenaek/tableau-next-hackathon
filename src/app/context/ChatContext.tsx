@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
+import { decodeHtmlEntities, LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface Message {
   id: string;
@@ -139,6 +139,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
       const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.PATIENT_DATA_CACHE);
       if (cached) {
         const patientData = JSON.parse(cached);
+        const decodedProviderNotes = decodeHtmlEntities(patientData.providerNotes);
+        const jsonProviderNotes = decodedProviderNotes?.replace(/'/g, '"');
         return {
           name: patientData.name,
           diagnosis: patientData.diagnosis,
@@ -147,7 +149,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           age: patientData.age,
           treatmentStatus: patientData.treatmentStatus,
           treatmentProgress: patientData.treatmentProgress,
-          providerNotes: patientData.providerNotes,
+          providerNotes: jsonProviderNotes,
           admissionDate: patientData.admissionDate,
           lengthOfStay: patientData.lengthOfStay,
           physician: patientData.physician,
