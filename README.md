@@ -33,10 +33,18 @@ Bringing **transparency to the ER/Hospital system** by empowering:
 - **Status Indicators** - Clear alerts for abnormal readings
 - **Interactive Detailed Views** - Drill down into specific metrics
 
+### Department Metrics Dashboard
+- **Hospital-Wide Analytics** - Real-time occupancy across all departments
+- **Tableau Next Integration** - Static dashboard images with caching
+- **Smart Caching** - Auto-loads cached dashboards for instant viewing
+- **AI Metrics Analysis** - Understand how department occupancy affects care
+
 ### Agentforce AI Assistant
 - **Context-Aware Chat** - Understands which page you're viewing
 - **HIPAA-Compliant Messaging** - Secure communication about your care
 - **Medical Explanations** - Get answers about diagnoses, treatments, and procedures
+- **Wait Time Predictions** - AI calculates estimated wait times based on occupancy
+- **Department Analytics** - Explains hospital capacity and resource allocation
 - **24/7 Availability** - Always-on support powered by Salesforce Einstein
 
 ## 🚀 Quick Start
@@ -73,8 +81,8 @@ SALESFORCE_CLIENT_SECRET="your-consumer-secret"
 SALESFORCE_TOKEN_URL="https://your-instance.salesforce.com/services/oauth2/token"
 SALESFORCE_AI_INSIGHTS_MODEL="sfdc_ai__DefaultGPT35Turbo"
 
-# Tableau (Optional)
-NEXT_PUBLIC_TABLEAU_DASHBOARD_URL="your-tableau-dashboard-url"
+# Tableau Next REST API (for dashboard images)
+# Uses existing Salesforce OAuth - no additional config needed
 ```
 
 4. **Run the development server**
@@ -103,7 +111,8 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **Salesforce Data Cloud** - Patient data management
 - **Agentforce Model API** - AI-powered insights (Einstein GPT)
 - **Salesforce REST API** - OAuth2 authenticated data access
-- **Tableau Embedding** - Interactive dashboards (optional)
+- **Tableau Next REST API** - Dashboard image downloads with caching
+- **LocalStorage Caching** - Smart session-based caching for performance
 
 ### UI Components
 - **Radix UI** - Accessible component primitives
@@ -126,11 +135,13 @@ src/
 │   │   ├── dashboard/     # Main patient dashboard
 │   │   ├── records/       # Medical records viewer
 │   │   ├── vitals/        # Vital signs monitoring
+│   │   ├── metrics/       # Department metrics analytics
 │   │   └── messages/      # Secure messaging
 │   └── lib/               # Utilities and helpers
 ├── components/
 │   ├── ui/                # Reusable UI components
-│   └── AgentforceChat.tsx # AI chat interface
+│   ├── AgentforceChat.tsx # AI chat interface
+│   └── TableauNextDashboard.tsx # Tableau dashboard component
 └── lib/
     └── salesforce/        # Salesforce API client
 ```
@@ -150,6 +161,9 @@ src/
 - **Accessible Components** - WCAG compliant
 - **Real-time Updates** - Live data synchronization
 - **Smooth Animations** - Delightful user interactions
+- **Collapsible Sidebar** - Maximizes screen space for content
+- **Smart Caching** - Instant loading with session-based cache
+- **Draggable Chat** - Reposition AI assistant anywhere on screen
 
 ## 📊 Data Flow
 
@@ -158,6 +172,8 @@ src/
 3. **Real-time Updates** - Department status and vitals refresh
 4. **Context Awareness** - Chat understands current page context
 5. **Secure Storage** - LocalStorage for UI state, server for sensitive data
+6. **Dashboard Images** - Tableau Next REST API for static dashboard snapshots
+7. **Smart Caching** - Session-based caching with automatic cleanup
 
 ## 🚦 Development Commands
 
@@ -188,6 +204,8 @@ This project was created for the Tableau Next Hackathon. While it's primarily a 
 - **Demo Mode** - Includes disclaimers for hackathon context
 - **Compassionate Design** - All AI responses use encouraging, patient-first language
 - **Accessibility First** - Designed for patients of all ages and abilities
+- **Tableau Next Integration** - Uses new 2025 REST API for dashboard downloads
+- **AI Wait Time Predictions** - Intelligent formula-based estimations by priority
 
 ## 🏆 Hackathon Focus Areas
 
