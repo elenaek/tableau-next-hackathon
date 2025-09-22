@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
+  BarChart2,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -46,7 +47,8 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   const navItems = [
     { href: '/', icon: Home, label: 'Dashboard', tooltip: 'Dashboard' },
     { href: '/patient/records', icon: FileText, label: 'Medical Records', tooltip: 'Medical Records' },
-    { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' }
+    { href: '/patient/vitals', icon: Activity, label: 'Vitals', tooltip: 'Vitals' },
+    { href: '/patient/metrics', icon: BarChart2, label: 'Department Metrics', tooltip: 'Department Metrics' }
   ];
 
   return (

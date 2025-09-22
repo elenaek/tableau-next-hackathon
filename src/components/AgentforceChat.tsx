@@ -282,7 +282,10 @@ export function AgentforceChat() {
                       size="sm"
                       variant="ghost"
                       className="h-7 w-7 p-0 cursor-pointer hover:scale-110 active:scale-95"
-                      onClick={() => setIsMinimized(!isMinimized)}
+                      onClick={() => {
+                        setIsMinimized(!isMinimized)
+                        setIsFocused(false);
+                      }}
                     >
                       {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
                     </Button>

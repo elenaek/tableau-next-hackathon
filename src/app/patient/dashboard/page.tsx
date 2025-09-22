@@ -22,7 +22,6 @@ import {
   User,
   Users
 } from 'lucide-react';
-// import TableauDashboard from '@/components/TableauDashboard';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { LoadingInsight } from '@/components/LoadingInsight';
@@ -1125,34 +1124,7 @@ export default function PatientDashboard() {
         </div>
       </div>
 
-      {/* Tableau Dashboard */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5" />
-            Analytics Dashboard
-          </CardTitle>
-          <CardDescription>Detailed visualizations and metrics</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TableauDashboard
-            url={process.env.NEXT_PUBLIC_TABLEAU_DASHBOARD_URL || 'https://orgfarm-73ec678028.lightning.force.com/tableau/dashboard/Patient_View/view'}
-            height="600px"
-            className="rounded-lg"
-          />
-        </CardContent>
-      </Card> */}
       </div>
-
-      {/* Floating Notification */}
-      {/* <FloatingNotification
-        show={showNotification}
-        onClose={() => setShowNotification(false)}
-        title="AI Insight Generated"
-        description={notificationMessage}
-        type="success"
-        duration={4000}
-      /> */}
     </div>
   );
 }

@@ -204,4 +204,79 @@ export class SalesforceClient {
 
     return response.json();
   }
+
+  async downloadTableauDashboardImage(params: {
+    dashboardName?: string;
+    customViewId?: string;
+    assetType?: string;
+  }): Promise<ArrayBuffer> {
+    await this.ensureAuthenticated();
+
+
+    const preUrl = `${this.instanceUrl}/services/data/v64.0/tableau/download?metadataOnly=true`;
+    const url = `${this.instanceUrl}/services/data/v64.0/tableau/download?metadataOnly=false`;
+
+    // Start session on BE - make metadata request first
+    const preResponse = await this.makeAuthenticatedRequest(preUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        asset: {
+          type: params.assetType || 'Dashboard',
+          dashboardName: params.dashboardName || ''
+        }
+      }),
+    });
+
+    if (!preResponse.ok) {
+      const errorText = await preResponse.text();
+      console.error('Tableau metadata request failed:', errorText);
+      throw new Error(`Tableau metadata request failed: ${preResponse.statusText}`);
+    }
+
+    // const preJsonRes = await preResponse.json();
+    // console.log('Tableau metadata request response:', preJsonRes);
+
+    // Wait 500ms to ensure session is established
+    // await new Promise(resolve => setTimeout(resolve, 500));
+
+    const response = await this.makeAuthenticatedRequest(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        asset: {
+          type: params.assetType || 'Dashboard',
+          dashboardName: params.dashboardName || ''
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Tableau dashboard image download failed:', errorText);
+      throw new Error(`Dashboard image download failed: ${response.statusText}`);
+    }
+
+    const jsonRes = await response.json();
+    // console.log('Tableau API response:', jsonRes);
+
+    // Extract the base64 encoded image data
+    const base64Image = jsonRes.downloadFile?.base64EncodedData;
+    if (!base64Image) {
+      throw new Error('No image data received from Tableau API');
+    }
+
+    // Convert base64 to ArrayBuffer
+    const binaryString = atob(base64Image);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes.buffer;
+  }
 }
