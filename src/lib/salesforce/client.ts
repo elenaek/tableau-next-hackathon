@@ -69,7 +69,7 @@ export class SalesforceClient {
     this.instanceUrl = data.instance_url;
     // Token expires in 2 hours, refresh after 1.5 hours
     this.tokenExpiry = Date.now() + 90 * 60 * 1000;
-    console.log('Salesforce token refreshed successfully, expires at:', new Date(this.tokenExpiry).toISOString());
+    // console.log('Salesforce token refreshed successfully, expires at:', new Date(this.tokenExpiry).toISOString());
   }
 
   private async ensureAuthenticated(): Promise<void> {
@@ -97,7 +97,7 @@ export class SalesforceClient {
 
     // If we get a 401, token might be expired, try refreshing once
     if (response.status === 401) {
-      console.log('Received 401, refreshing token and retrying...');
+      // console.log('Received 401, refreshing token and retrying...');
       this.accessToken = null; // Force refresh
       this.tokenExpiry = null;
       await this.authenticate();

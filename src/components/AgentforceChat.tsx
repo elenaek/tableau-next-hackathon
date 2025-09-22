@@ -20,6 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useChat } from '@/app/context/ChatContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { useChatStore } from '@/lib/stores/useChatStore';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -44,6 +45,9 @@ export function AgentforceChat() {
     clearMessages,
     savePositionAndSize
   } = useChat();
+
+  // Sync with Zustand store for global access
+  const { isChatOpen, setChatOpen, setChatMinimized } = useChatStore();
 
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -75,6 +79,22 @@ export function AgentforceChat() {
       textareaRef.current.focus();
     }
   }, [isOpen, isMinimized]);
+
+  // Sync local state with Zustand store
+  useEffect(() => {
+    setChatOpen(isOpen);
+  }, [isOpen, setChatOpen]);
+
+  useEffect(() => {
+    setChatMinimized(isMinimized);
+  }, [isMinimized, setChatMinimized]);
+
+  // Sync from Zustand to local state (when changed externally, e.g., from tour)
+  useEffect(() => {
+    if (isChatOpen !== isOpen) {
+      setIsOpen(isChatOpen);
+    }
+  }, [isChatOpen]);
 
   // Handle dragging
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -200,11 +220,14 @@ export function AgentforceChat() {
             initial={{ x: 100 }}
             animate={{ x: 0 }}
             exit={{ x: 100 }}
-            className="fixed top-1/8 z-50"
+            className="fixed top-1/8 z-50 agentforce-chat-section-tab"
             style={{ right: '15px' }}
           >
             <Button
-              onClick={() => setIsOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(true);
+              }}
               className="cursor-pointer rounded-l-lg rounded-r-none h-36 px-3 py-1 bg-indigo-500 hover:bg-indigo-900 text-white shadow-lg hover:scale-102 active:scale-98"
               size="lg"
             >
@@ -235,7 +258,7 @@ export function AgentforceChat() {
               zIndex: 9999,
             }}
             className={cn(
-              "transition-opacity duration-200",
+              "transition-opacity duration-200 agentforce-chat-section-expanded-window",
               !isFocused && !isHovered && !isDragging && !isResizing ? "opacity-40" : "opacity-100"
             )}
             onMouseDown={handleMouseDown}
@@ -273,7 +296,10 @@ export function AgentforceChat() {
                       size="sm"
                       variant="ghost"
                       className="h-7 w-7 p-0 cursor-pointer hover:scale-110 active:scale-95"
-                      onClick={clearMessages}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearMessages();
+                      }}
                       title="Clear chat"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -282,8 +308,9 @@ export function AgentforceChat() {
                       size="sm"
                       variant="ghost"
                       className="h-7 w-7 p-0 cursor-pointer hover:scale-110 active:scale-95"
-                      onClick={() => {
-                        setIsMinimized(!isMinimized)
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMinimized(!isMinimized);
                         setIsFocused(false);
                       }}
                     >
@@ -293,7 +320,10 @@ export function AgentforceChat() {
                       size="sm"
                       variant="ghost"
                       className="h-7 w-7 p-0 cursor-pointer hover:scale-115 active:scale-95"
-                      onClick={() => setIsOpen(false)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(false);
+                      }}
                     >
                       <X className="h-4 w-4" />
                     </Button>

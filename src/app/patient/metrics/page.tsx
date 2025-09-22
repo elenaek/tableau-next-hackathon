@@ -91,7 +91,7 @@ export default function DepartmentMetrics() {
       <DemoDisclaimer />
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 metrics-header">
           <Sparkles className="inline-block" particleColor="indigo" particleCount={10}>
             <h1 className="text-3xl font-bold z-0">Department Metrics</h1>
           </Sparkles>

@@ -234,7 +234,7 @@ export default function VitalsPage() {
       <DemoDisclaimer />
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start vitals-header">
           <div>
           <Sparkles className="inline-block" particleColor="pink" particleCount={10}>
             <h1 className="text-3xl font-bold">Vital Signs</h1>
@@ -244,7 +244,7 @@ export default function VitalsPage() {
         </div>
 
         {/* Current Vitals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 vitals-grid">
           {mockVitals.map((vital, index) => {
             const Icon = vital.icon;
             return (
@@ -257,7 +257,7 @@ export default function VitalsPage() {
               <AnimatedCard>
               <Card
                 key={vital.type}
-                className={`cursor-pointer transition-all hover:shadow-lg ${
+                className={`cursor-pointer transition-all hover:shadow-lg vital-card ${
                   selectedVital?.type === vital.type ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedVital(vital)}
@@ -325,7 +325,7 @@ export default function VitalsPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 vital-details">
               {/* Current Reading */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <motion.div
@@ -463,7 +463,7 @@ export default function VitalsPage() {
         )}
 
         {/* Weekly Trends */}
-        <AnimatedCard>
+        <AnimatedCard className="vital-trends">
         <Card>
           <CardHeader>
             <CardTitle>7-Day Trends</CardTitle>

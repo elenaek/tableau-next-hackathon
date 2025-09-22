@@ -11,19 +11,22 @@ import {
   FileText,
   Home,
   LogOut,
+  Map,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/app/context/AuthContext';
 import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
+import { TourProvider, useTour } from '@/app/context/TourContext';
 
-interface PatientLayoutProps {
+interface PatientLayoutContentProps {
   children: ReactNode;
 }
 
-export default function PatientLayout({ children }: PatientLayoutProps) {
+function PatientLayoutContent({ children }: PatientLayoutContentProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
+  const { startTour, hasSeenTour } = useTour();
 
   // Initialize collapsed state from localStorage
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -54,7 +57,7 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-        <aside className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-card flex flex-col`}>
+      <aside className={`${isCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 border-r bg-card flex flex-col`}>
         {/* Header with toggle button */}
         <div className={`${isCollapsed ? 'p-4' : 'p-6'} flex items-center justify-between`}>
           {!isCollapsed && <h2 className="text-2xl font-bold">Patient Portal</h2>}
@@ -93,8 +96,20 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
           </ul>
         </nav>
 
-        {/* Footer */}
-        <div className={`mt-auto ${isCollapsed ? 'p-2' : 'p-4'} border-t`}>
+        {/* Footer with Tour and Logout buttons */}
+        <div className={`mt-auto ${isCollapsed ? 'p-2' : 'p-4'} border-t space-y-2`}>
+          {/* Tour Button */}
+          <Button
+            variant="outline"
+            className={`w-full cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start'}`}
+            onClick={() => startTour()}
+            title={isCollapsed ? 'Start Tour' : undefined}
+          >
+            <Map className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4 mr-3'}`} />
+            {!isCollapsed && <span>Start Tour</span>}
+          </Button>
+
+          {/* Logout Button */}
           <Button
             variant="ghost"
             className={`w-full cursor-pointer active:scale-95 ${isCollapsed ? 'justify-center px-0' : 'justify-start text-red-500 hover:text-red-600'}`}
@@ -112,5 +127,17 @@ export default function PatientLayout({ children }: PatientLayoutProps) {
         {children}
       </main>
     </div>
+  );
+}
+
+interface PatientLayoutProps {
+  children: ReactNode;
+}
+
+export default function PatientLayout({ children }: PatientLayoutProps) {
+  return (
+    <TourProvider>
+      <PatientLayoutContent>{children}</PatientLayoutContent>
+    </TourProvider>
   );
 }

@@ -757,7 +757,7 @@ export default function PatientDashboard() {
 
       {/* Patient Info Card */}
       <AnimatedCard>
-        <Card>
+        <Card className="patient-info-section">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5 text-blue-400" />
@@ -801,7 +801,7 @@ export default function PatientDashboard() {
         <div className="space-y-6">
 
           {/* Physicians and Consults */}
-          <AnimatedCard>
+          <AnimatedCard className="care-team-section">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -817,7 +817,7 @@ export default function PatientDashboard() {
           </AnimatedCard>
           
           {/* Treatment Progress */}
-          <AnimatedCard>
+          <AnimatedCard className="treatment-progress-section">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -847,7 +847,7 @@ export default function PatientDashboard() {
 
           {/* Treatment Progress Insight */}
           <AnimatedCard>
-          <Card>
+          <Card className="treatment-progress-insights-section">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-pink-300" />
@@ -900,7 +900,7 @@ export default function PatientDashboard() {
         {/* Right Column - Diagnosis and Insights */}
         <div className="space-y-6">
           {/* Current Diagnosis */}
-          <AnimatedCard>
+          <AnimatedCard className="diagnosis-insights-section">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -963,7 +963,7 @@ export default function PatientDashboard() {
           {/* Department Status */}
           {departmentStatus ? (
             <AnimatedCard>
-            <Card>
+            <Card className="department-status-section">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Hospital className="w-5 h-5 text-red-600" />

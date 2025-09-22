@@ -353,14 +353,14 @@ export default function MedicalRecordsPage() {
         </div>
 
         {/* Search and Filters */}
-        <AnimatedCard>
+        <AnimatedCard className="records-header">
         <Card>
           <CardHeader>
             <CardTitle>Search Records</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
+              <div className="relative flex-1 records-search">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by title, provider, or department..."
@@ -369,7 +369,7 @@ export default function MedicalRecordsPage() {
                   className="pl-10"
                 />
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap records-filters">
                 <Button
                   variant={selectedType === 'all' ? 'default' : 'outline'}
                   size="sm"
@@ -398,7 +398,7 @@ export default function MedicalRecordsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Records List */}
           <div className="lg:col-span-2 space-y-4">
-            <AnimatedCard>
+            <AnimatedCard className="records-list">
             <Card>
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -479,7 +479,7 @@ export default function MedicalRecordsPage() {
           </div>
 
           {/* Record Details */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 records-details">
             <AnimatedCard containerClassName="sticky top-6">
             <Card>
               <CardHeader>
@@ -708,7 +708,7 @@ export default function MedicalRecordsPage() {
 
         {/* Summary Statistics */}
         <AnimatedCard>
-        <Card>
+        <Card className="records-stats">
           <CardHeader>
             <CardTitle>Records Summary</CardTitle>
           </CardHeader>

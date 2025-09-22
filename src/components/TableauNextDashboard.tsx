@@ -260,7 +260,7 @@ export default function TableauNextDashboard({
   return (
     <div className={`tableau-next-dashboard ${className}`}>
       {/* Control Buttons */}
-      <div className="flex justify-end gap-2 mb-4">
+      <div className="flex justify-end gap-2 mb-4 tour-tableau-next-dashboard-controls">
         <Button
           variant="outline"
           size="sm"
@@ -344,8 +344,8 @@ export default function TableauNextDashboard({
       )}
 
       {/* Dashboard Display */}
-      <Card className="overflow-hidden">
-        <CardContent className="pl-[15%] pr-[15%]">
+      <Card className="overflow-hidden tour-tableau-next-dashboard">
+        <CardContent className="pl-[15%] pr-[15%] pb-0">
           {showImage && imageUrl ? (
             <div
               className="relative w-full overflow-hidden bg-gray-100"

@@ -193,7 +193,7 @@ Remember: You are here to help the patient understand their care better, not to 
       content: message
     });
 
-    console.log(systemMessage);
+    // console.log(systemMessage);
 
     // Call the new generateChat method
     const aiResponse = await client.generateChat(messages);
