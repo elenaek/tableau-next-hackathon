@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download, Eye, EyeOff, RefreshCw, AlertCircle, Maximize2 } from 'lucide-react';
+import { Download, Eye, EyeOff, RefreshCw, AlertCircle } from 'lucide-react';
 
 interface TableauNextDashboardProps {
   dashboardName?: string;

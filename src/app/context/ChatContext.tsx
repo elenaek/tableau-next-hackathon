@@ -266,6 +266,36 @@ export function ChatProvider({ children }: ChatProviderProps) {
     };
   };
 
+  // Get department metrics context when on metrics page
+  const getDepartmentMetricsContext = () => {
+    if (!pathname?.includes('/patient/metrics')) return null;
+
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEYS.DEPARTMENT_METRICS_DATA);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        return {
+          metrics: data,
+          lastUpdated: timestamp,
+          summary: `Hospital has ${data.length} departments being monitored. Current overall occupancy across departments.`
+        };
+      }
+    } catch (error) {
+      console.error('Error getting department metrics context:', error);
+    }
+
+    // Return mock data if no cached data
+    return {
+      metrics: [
+        { department: 'Emergency', occupancyPercentage: 85, occupancy: 8, availableBeds: 2, totalBeds: 10 },
+        { department: 'ICU', occupancyPercentage: 90, occupancy: 9, availableBeds: 1, totalBeds: 10 },
+        { department: 'General Ward', occupancyPercentage: 70, occupancy: 7, availableBeds: 3, totalBeds: 10 }
+      ],
+      summary: 'Hospital departments are experiencing moderate to high occupancy levels.',
+      lastUpdated: new Date().toISOString()
+    };
+  };
+
   // Clear all messages and reset to initial state
   const clearMessages = useCallback(() => {
     setMessages([
@@ -298,6 +328,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       const medicalRecordsContext = getMedicalRecordsContext();
       const vitalsContext = getVitalsContext();
       const departmentContext = getDepartmentContext();
+      const departmentMetricsContext = getDepartmentMetricsContext();
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -310,6 +341,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           medicalRecordsContext,
           vitalsContext,
           departmentContext,
+          departmentMetricsContext,
           currentPage: pathname,
           conversationHistory: messages.slice(-5) // Send last 5 messages for context
         }),

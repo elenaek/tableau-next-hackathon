@@ -4,7 +4,7 @@ import { getSalesforceClient } from '@/lib/salesforce';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, patientContext, medicalRecordsContext, vitalsContext, departmentContext, currentPage, conversationHistory } = body;
+    const { message, patientContext, medicalRecordsContext, vitalsContext, departmentContext, departmentMetricsContext, currentPage, conversationHistory } = body;
 
     if (!message) {
       return NextResponse.json(
@@ -85,7 +85,62 @@ Department Status Information:
 - Last Updated: ${departmentContext.lastUpdated}
 - Status: ${departmentContext.status}
 
-The patient is currently viewing their dashboard and may have questions about department busyness, wait times, staffing levels, or when they might receive attention. 
+The patient is currently viewing their dashboard and may have questions about department busyness, wait times, staffing levels, or when they might receive attention.
+` : '';
+
+    // Add department metrics context if on metrics page
+    const metricsInfo = departmentMetricsContext ? `
+Hospital-Wide Department Metrics:
+${departmentMetricsContext.summary}
+
+Department Occupancy Details:
+${
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  departmentMetricsContext.metrics?.map((m: any) =>
+  `- ${m.department}: ${m.occupancyPercentage}% occupied (${m.occupancy}/${m.totalBeds} beds used, ${m.availableBeds} available)`
+).join('\n')}
+
+Last Updated: ${departmentMetricsContext.lastUpdated}
+
+The patient is currently viewing the Department Metrics page showing hospital-wide analytics. They may be asking about:
+- Why certain departments are busy or slow
+- How department occupancy affects their wait time or care
+- General hospital capacity and resource allocation
+- Predictions or trends about when things might improve
+
+When discussing metrics:
+- Help them understand how department occupancy affects patient care timelines
+- Explain that high occupancy can mean longer wait times but doesn't affect quality of care
+- Be reassuring that all patients receive care based on medical priority
+- Provide insights about typical patterns (e.g., ERs busier in evenings, weekends)
+- If a department is beyond 100% occupancy then that means the patients are in the overflow area and are being treated in the hallway or other areas of the hospital.
+
+Wait Time Estimation Formula:
+For any department, base wait time = Math.round(16 * (occupancy)) minutes
+- High-risk/urgent cases: Math.max(5, Math.round(baseWaitTime * 0.3)) minutes
+- Normal priority cases: Math.round(baseWaitTime * 1.2) minutes
+- Low priority cases: Math.round(baseWaitTime * 1.8) minutes
+
+Example: If Emergency Department is at 85% occupancy:
+- Base wait time = 12 * 0.85 * 4 = ~41 minutes
+- High-risk patients (heart attack, stroke): ~12 minutes
+- Normal priority (fracture, moderate pain): ~49 minutes
+- Low priority (minor cuts, cold symptoms): ~74 minutes
+
+Always emphasize that critical cases are seen immediately regardless of wait times.
+
+Department-to-Condition Mapping:
+- Infectious Disease: Septicemia, Urinary Tract Infection etc
+- Cardiology: Heart Attack, Angina, Atrial Fibrillation, etc
+- Orthopedics Rehabilitation: Osteoarthritis, etc
+- Internal Medicine: Pneumonia, Bronchitis, etc
+- Endocrinology: Diabetes, Thyroid Disorders, etc
+- Neurology: Stroke, etc
+- Hematology Vascular Medicine: Venous Thromboembolism, etc
+- Pulmonology Respiratory: COPD, Asthma, etc
+- Gastroenterology: GI Bleeding, Acute Pancreatitis, etc
+- Nephrology: Hypo Hypernatremia, Hyperkalemia, Acute Kidney Injury, etc
+- Geriatrics General Internal Medicine: Delerium, Anemia, etc
 ` : '';
 
     // Add page context hint
@@ -93,13 +148,15 @@ The patient is currently viewing their dashboard and may have questions about de
       '\nNote: The user is on the Medical Records page, so they may be asking about specific tests, results, or procedures.' :
       currentPage?.includes('/patient/vitals') ?
       '\nNote: The user is on the Vitals page, so they may be asking about their vital signs, what they mean, or trends.' :
+      currentPage?.includes('/patient/metrics') ?
+      '\nNote: The user is on the Department Metrics page, so they may be asking about hospital capacity, department busyness, or how this affects their care.' :
       (currentPage === '/' || currentPage === '/patient/dashboard') ?
       '\nNote: The user is on the Dashboard page, so they may be asking about department status, wait times, or when they will be seen.' :
       '';
 
     const systemMessage = `You are an AI healthcare assistant helping a patient understand their medical care and records.
 
-${patientInfo}${recordsInfo}${vitalsInfo}${departmentInfo}${pageContext}
+${patientInfo}${recordsInfo}${vitalsInfo}${departmentInfo}${metricsInfo}${pageContext}
 
 Guidelines:
 - Use simple, clear language that patients can understand
@@ -133,7 +190,7 @@ Remember: You are here to help the patient understand their care better, not to 
       content: message
     });
 
-    // console.log(systemMessage);
+    console.log(systemMessage);
 
     // Call the new generateChat method
     const aiResponse = await client.generateChat(messages);

@@ -14,6 +14,7 @@ export const LOCAL_STORAGE_KEYS = {
   MEDICAL_RECORDS_DATA: 'medicalRecordsData',
   VITALS_DATA: 'vitalsData',
   DEPARTMENT_BUSYNESS_DATA: 'departmentBusynessData',
+  DEPARTMENT_METRICS_DATA: 'departmentMetricsData',
 }
 
 export function decodeHtmlEntities(htmlString: string) {
