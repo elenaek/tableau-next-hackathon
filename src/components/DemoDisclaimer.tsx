@@ -45,7 +45,7 @@ export function DemoDisclaimer() {
         <div className="flex items-center gap-3">
           <InfoIcon className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm font-medium">
-            This is a Tableau Next Hackathon project demonstrating the use of Agentforce and other Salesforce APIs to provide insights and better transparency for patients.
+            This is a Tableau Next Hackathon project demonstrating the use of Agentforce/Models API, Tableau Next Rest API, and other Salesforce APIs to provide insights and better transparency for patients.
           </p>
         </div>
         <Button
