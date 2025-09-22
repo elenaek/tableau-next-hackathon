@@ -35,6 +35,7 @@ Patient Information:
 - Room Number: ${patientContext.roomNumber}
 - Treatment Progress: ${JSON.stringify(patientContext.treatmentProgress)}
 - Provider Notes: ${patientContext.providerNotes}
+- Estimated Discharge Date: ${patientContext.estimatedDischargeDate}
 ` : '';
 
     // Add medical records context if on records page

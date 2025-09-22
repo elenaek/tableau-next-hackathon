@@ -153,7 +153,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
           admissionDate: patientData.admissionDate,
           lengthOfStay: patientData.lengthOfStay,
           physician: patientData.physician,
-          roomNumber: patientData.roomNumber
+          roomNumber: patientData.roomNumber,
+          estimatedDischargeDate: patientData.estimatedDischargeDate
         };
       }
     } catch (error) {

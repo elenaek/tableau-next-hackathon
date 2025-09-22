@@ -77,6 +77,7 @@ interface PatientData {
   treatmentStatus: string;
   treatmentProgress?: ProgressStep[];
   providerNotes?: string | ProviderNote[];
+  estimatedDischargeDate?: string;
   isMock: boolean;
 }
 
@@ -443,7 +444,8 @@ export default function PatientDashboard() {
         physician__c: 'physician',
         provider_notes__c: 'providerNotes',
         patient_treatment_progress__c: 'treatmentProgress',
-        length_of_stay__c: 'lengthOfStay'
+        length_of_stay__c: 'lengthOfStay',
+        estimated_discharge_date__c: 'estimatedDischargeDate'
       }
 
       const treatmentProgressStepConversion = {
@@ -688,7 +690,8 @@ export default function PatientDashboard() {
         staffOnDuty: departmentStatus?.staffOnDuty,
         currentPatients: departmentStatus?.currentPatients,
         availableBeds: departmentStatus?.availableBeds,
-        totalBeds: departmentStatus?.totalBeds
+        totalBeds: departmentStatus?.totalBeds,
+        estimatedDischargeDate: patientData?.estimatedDischargeDate
       };
 
       const response = await fetch('/api/ai-insights', {

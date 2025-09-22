@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
         - Current Status: ${context.status}
         - Treatment Plan: ${JSON.stringify(context.treatmentPlan)}
         - Recent Vitals: ${context.vitals}
+        - Estimated Discharge Date: ${context.estimatedDischargeDate}
         `;
         break;
 
