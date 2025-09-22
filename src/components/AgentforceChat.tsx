@@ -289,7 +289,6 @@ export function AgentforceChat() {
                   <div className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-pink-400"/>
                     <h3 className="font-semibold text-sm">Agentforce Health Assistant</h3>
-                    <span className="text-xs text-muted-foreground">HIPAA Compliant with Agentforce</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button

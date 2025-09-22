@@ -41,11 +41,17 @@ Bringing **transparency to the ER/Hospital system** by empowering:
 
 ### Agentforce AI Assistant
 - **Context-Aware Chat** - Understands which page you're viewing
-- **HIPAA-Compliant Messaging** - Secure communication about your care
+- **Encrypted Messaging** - Secure communication about your care
 - **Medical Explanations** - Get answers about diagnoses, treatments, and procedures
 - **Wait Time Predictions** - AI calculates estimated wait times based on occupancy
 - **Department Analytics** - Explains hospital capacity and resource allocation
 - **24/7 Availability** - Always-on support powered by Salesforce Einstein
+
+### Interactive Guided Tours
+- **First-Time User Onboarding** - Interactive walkthrough of key features
+- **React Joyride Integration** - Step-by-step tooltips and highlights
+- **Contextual Help** - Learn about features as you explore
+- **Persistent Settings** - Tour preferences saved in localStorage
 
 ## 🚀 Quick Start
 
@@ -117,6 +123,8 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 ### UI Components
 - **Radix UI** - Accessible component primitives
 - **React Markdown** - Render AI responses with formatting
+- **React Joyride** - Interactive guided tours
+- **Zustand** - Lightweight state management
 - **Aceternity UI** - Premium animated components
 
 ## 📁 Project Structure
@@ -127,10 +135,14 @@ src/
 │   ├── api/               # Server-side API routes
 │   │   ├── auth/          # Authentication endpoints
 │   │   ├── patient/       # Patient data endpoints
-│   │   ├── department/    # Department status
+│   │   ├── department/    # Department status & metrics
 │   │   ├── ai-insights/   # AI insight generation
-│   │   └── chat/          # Agentforce chat API
-│   ├── context/           # React contexts (Auth, Chat)
+│   │   ├── chat/          # Agentforce chat API
+│   │   └── tableau-image/ # Tableau dashboard snapshots
+│   ├── context/           # React contexts
+│   │   ├── AuthContext.tsx    # Authentication state
+│   │   ├── ChatContext.tsx    # Chat state management
+│   │   └── TourContext.tsx    # Guided tour state
 │   ├── patient/           # Patient portal pages
 │   │   ├── dashboard/     # Main patient dashboard
 │   │   ├── records/       # Medical records viewer
@@ -170,9 +182,10 @@ src/
 2. **AI Processing** - Agentforce Model API generates insights
 3. **Real-time Updates** - Department status and vitals refresh
 4. **Context Awareness** - Chat understands current page context
-5. **Secure Storage** - LocalStorage for UI state, server for sensitive data
-6. **Dashboard Images** - Tableau Next REST API for static dashboard snapshots
-7. **Smart Caching** - Session-based caching with automatic cleanup
+5. **State Management** - Zustand for global state, localStorage for persistence
+6. **Secure Storage** - LocalStorage for UI state, server for sensitive data
+7. **Dashboard Images** - Tableau Next REST API for static dashboard snapshots
+8. **Smart Caching** - Session-based caching with automatic cleanup
 
 ## 🚦 Development Commands
 
@@ -180,7 +193,7 @@ src/
 # Development server with Turbopack
 npm run dev
 
-# Production build
+# Production build with Turbopack
 npm run build
 
 # Start production server
@@ -188,10 +201,18 @@ npm run start
 
 # Run ESLint
 npm run lint
-
-# Type checking
-npm run type-check
 ```
+
+## 🔧 Troubleshooting
+
+### Dependency Issues
+If you encounter peer dependency warnings with React 19:
+- The project includes a `.npmrc` file with `legacy-peer-deps=true`
+- This allows compatibility with libraries that haven't updated to React 19 yet
+
+### Build Issues on Vercel
+- Ensure the `.npmrc` file is committed to your repository
+- The build uses Next.js 15.5.3 with Turbopack for optimal performance
 
 ## 🤝 Contributing
 
@@ -205,6 +226,8 @@ This project was created for the Tableau Next Hackathon. While it's primarily a 
 - **Accessibility First** - Designed for patients of all ages and abilities
 - **Tableau Next Integration** - Uses new 2025 REST API for dashboard downloads
 - **AI Wait Time Predictions** - Intelligent formula-based estimations by priority
+- **React 19 Compatibility** - Using legacy peer deps for library compatibility
+- **Guided Tour Support** - Interactive onboarding for new users
 
 ## 🏆 Hackathon Focus Areas
 
