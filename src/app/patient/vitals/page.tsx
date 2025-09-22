@@ -241,10 +241,6 @@ export default function VitalsPage() {
           </Sparkles>
             <p className="text-muted-foreground">Monitor your health metrics and trends</p>
           </div>
-          <Badge variant="outline" className="text-sm px-2 py-1">
-            <Clock className="w-4 h-4 mr-2" />
-            Last updated: {formatTime(mockVitals[0].current.timestamp)}
-          </Badge>
         </div>
 
         {/* Current Vitals Grid */}

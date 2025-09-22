@@ -750,10 +750,6 @@ export default function PatientDashboard() {
           </Sparkles>
           <p className="text-muted-foreground">Your healthcare journey at a glance</p>
         </div>
-        <Badge variant="outline" className="text-sm px-2 py-1">
-          <Clock className="w-4 h-4 mr-2" />
-          Last updated: {new Date().toLocaleTimeString()}
-        </Badge>
       </div>
 
       {/* Patient Info Card */}

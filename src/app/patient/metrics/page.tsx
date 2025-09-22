@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { ChartNoAxesCombined, CircleQuestionMark } from 'lucide-react';
+import { Sparkles } from '@/components/ui/sparkles';
 import TableauNextDashboard from '@/components/TableauNextDashboard';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { useCallback, useEffect, useState } from 'react';
@@ -91,7 +92,9 @@ export default function DepartmentMetrics() {
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Department Metrics</h1>
+          <Sparkles className="inline-block" particleColor="indigo" particleCount={10}>
+            <h1 className="text-3xl font-bold z-0">Department Metrics</h1>
+          </Sparkles>
           <p className="text-muted-foreground">Not so real-time analytics (:P) and performance indicators</p>
         </div>
 
