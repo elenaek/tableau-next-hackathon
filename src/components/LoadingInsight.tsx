@@ -6,7 +6,7 @@ interface LoadingInsightProps {
 
 export function LoadingInsight({ message = 'Generating insights' }: LoadingInsightProps) {
   return (
-    <div className="p-6 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 flex flex-col items-center justify-center space-y-3">
+    <div className="p-6 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 flex flex-col items-center justify-center space-y-3">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <div className="text-center">
         <p className="text-sm font-medium text-foreground">{message}</p>

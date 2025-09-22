@@ -335,8 +335,8 @@ export default function TableauNextDashboard({
 
       {/* Error Message */}
       {error && (
-        <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
-          <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+        <div className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50">
+          <div className="flex items-center gap-2 text-red-600">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">{error}</span>
           </div>
@@ -348,7 +348,7 @@ export default function TableauNextDashboard({
         <CardContent className="pl-[15%] pr-[15%]">
           {showImage && imageUrl ? (
             <div
-              className="relative w-full overflow-hidden bg-gray-100 dark:bg-gray-900"
+              className="relative w-full overflow-hidden bg-gray-100"
               style={{ height: dynamicHeight }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}

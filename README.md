@@ -157,7 +157,6 @@ src/
 ## 🎨 Key UI Features
 
 - **Responsive Design** - Works on all screen sizes
-- **Dark Mode Support** - Automatic theme detection
 - **Accessible Components** - WCAG compliant
 - **Real-time Updates** - Live data synchronization
 - **Smooth Animations** - Delightful user interactions

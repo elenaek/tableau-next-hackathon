@@ -367,10 +367,10 @@ export function AgentforceChat() {
                     </div>
 
                     {/* AI Disclaimer */}
-                    <div className="px-3 py-1 bg-gray-50/50 dark:bg-gray-900/50">
+                    <div className="px-3 py-1 bg-gray-50/50">
                       <div className="flex items-start gap-1.5">
                         <Info className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed italic">
+                        <p className="text-[10px] text-gray-500 leading-relaxed italic">
                           AI responses may contain inaccuracies. Always double-check and consult your healthcare team for medical advice.
                         </p>
                       </div>

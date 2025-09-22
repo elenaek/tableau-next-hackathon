@@ -183,12 +183,12 @@ const mockRecords: MedicalRecord[] = [
 
 
 const recordTypeConfig = {
-  lab: { icon: FlaskConical, color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
-  imaging: { icon: Image, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
-  consultation: { icon: Stethoscope, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' },
-  prescription: { icon: Pill, color: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' },
-  procedure: { icon: Activity, color: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300' },
-  vaccination: { icon: FileText, color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' }
+  lab: { icon: FlaskConical, color: 'bg-green-100 text-green-700' },
+  imaging: { icon: Image, color: 'bg-blue-100 text-blue-700' },
+  consultation: { icon: Stethoscope, color: 'bg-purple-100 text-purple-700' },
+  prescription: { icon: Pill, color: 'bg-orange-100 text-orange-700' },
+  procedure: { icon: Activity, color: 'bg-pink-100 text-pink-700' },
+  vaccination: { icon: FileText, color: 'bg-indigo-100 text-indigo-700' }
 };
 
 export default function MedicalRecordsPage() {
@@ -573,8 +573,8 @@ export default function MedicalRecordsPage() {
                             <Info className="h-4 w-4 text-blue-500" />
                             <span>AI-Generated Explanation</span>
                           </div>
-                          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <div className="p-3 bg-blue-50 rounded-lg">
+                            <div className="prose prose-sm max-w-none">
                               <Markdown remarkPlugins={[remarkGfm]}
                                 components={{
                                   h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,

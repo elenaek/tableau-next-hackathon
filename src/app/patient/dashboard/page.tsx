@@ -274,7 +274,7 @@ const PhysicianSection = ({ patientData }: { patientData: PatientData | null }) 
     <div className="space-y-4 w-full">
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-3">Rounding Physician</h3>
-        <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+        <Card className="bg-blue-50/50 border-blue-200">
           <CardContent className="p-4">
             <div className="flex justify-between items-start gap-3">
               <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -926,7 +926,7 @@ export default function PatientDashboard() {
                 <LoadingInsight message="Understanding your diagnosis" />
               ) : diagnosisInsight ? (
                 <div>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="p-4 bg-blue-50 rounded-lg">
                     <Markdown remarkPlugins={[remarkGfm]}
                       components={{
                         h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,
@@ -974,10 +974,10 @@ export default function PatientDashboard() {
               <CardContent>
                 {/* Status Header */}
                 {departmentStatus.status && (
-                  <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20 rounded-lg border border-orange-200 dark:border-orange-900">
+                  <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border border-orange-200">
                     <div className="flex items-center justify-center gap-2">
                       <Activity className="w-5 h-5 text-orange-600 animate-pulse" />
-                      <span className="font-semibold text-lg text-orange-900 dark:text-orange-300">
+                      <span className="font-semibold text-lg text-orange-900">
                         {departmentStatus.status}
                       </span>
                     </div>
@@ -986,22 +986,22 @@ export default function PatientDashboard() {
 
                 {/* Wait Times Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200">
+                  <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3 text-amber-600" />
                       <span className="text-xs text-amber-700 font-medium">High Risk Cases</span>
                     </div>
-                    <p className="text-xl font-bold mt-1 text-amber-700 dark:text-amber-300">
+                    <p className="text-xl font-bold mt-1 text-amber-700">
                       {Math.max(5, Math.round((departmentStatus?.waitTime || 0) * 0.3))} min
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Priority queue</p>
                   </div>
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3 text-green-600" />
                       <span className="text-xs text-green-600 font-medium">Normal Cases</span>
                     </div>
-                    <p className="text-xl font-bold mt-1 text-green-800 dark:text-green-300">
+                    <p className="text-xl font-bold mt-1 text-green-800">
                       {Math.round((departmentStatus.waitTime || 0) * 1.2)} min
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Standard queue</p>
@@ -1037,7 +1037,7 @@ export default function PatientDashboard() {
                   <LoadingInsight message="Checking department status" />
                 ) : departmentInsight ? (
                   <>
-                    <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <div className="p-4 bg-purple-50 rounded-lg">
                       <Markdown remarkPlugins={[remarkGfm]}
                         components={{
                           h1: ({ children }) => <h1 className="mb-2 last:mb-0 text-xl font-bold">{children}</h1>,

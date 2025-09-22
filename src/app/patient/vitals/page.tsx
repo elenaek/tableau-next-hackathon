@@ -442,14 +442,14 @@ export default function VitalsPage() {
 
               {/* Alert Section */}
               {selectedVital.current.status === 'warning' && (
-                <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900 rounded-lg p-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <div className="flex gap-3">
-                    <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                    <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0" />
                     <div>
-                      <p className="font-medium text-orange-900 dark:text-orange-100">
+                      <p className="font-medium text-orange-900">
                         Slightly Elevated Reading
                       </p>
-                      <p className="text-sm text-orange-800 dark:text-orange-200 mt-1">
+                      <p className="text-sm text-orange-800 mt-1">
                         Your {selectedVital.name.toLowerCase()} is slightly above the normal range.
                         Continue monitoring and follow your care team&apos;s recommendations.
                       </p>
