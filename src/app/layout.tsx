@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700', '900'],
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${roboto.variable} ${robotoMono.variable} font-sans antialiased`}
       >
+        <Analytics />
         <ClientProviders>
           {children}
         </ClientProviders>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from './context/AuthContext';
+import { FloatingNotification } from '@/components/ui/floating-notification';
 import LoginForm from './components/LoginForm';
 import PatientDashboard from './patient/dashboard/page';
 import PatientLayout from './patient/layout';
@@ -9,12 +10,23 @@ import PatientLayout from './patient/layout';
 export default function Home() {
   const { authState, login, isLoading } = useAuth();
   const [loginError, setLoginError] = useState('');
+  const [rateLimitNotification, setRateLimitNotification] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
 
   const handleLogin = async (username: string, password: string) => {
     setLoginError('');
-    const success = await login(username, password);
-    if (!success) {
-      setLoginError('Invalid username or password. Please try again.');
+    setRateLimitNotification({ show: false, message: '' });
+
+    const result = await login(username, password);
+
+    if (!result.success) {
+      if (result.isRateLimited) {
+        setRateLimitNotification({
+          show: true,
+          message: result.error || 'Too many login attempts. Please try again later.'
+        });
+      } else {
+        setLoginError(result.error || 'Invalid username or password. Please try again.');
+      }
     }
   };
 
@@ -32,7 +44,19 @@ export default function Home() {
 
   // Show login form if not authenticated
   if (!authState.isAuthenticated) {
-    return <LoginForm onLogin={handleLogin} error={loginError} />;
+    return (
+      <>
+        <LoginForm onLogin={handleLogin} error={loginError} />
+        <FloatingNotification
+          show={rateLimitNotification.show}
+          onClose={() => setRateLimitNotification({ show: false, message: '' })}
+          title="Rate Limit Reached"
+          description={rateLimitNotification.message}
+          type="warning"
+          duration={8000}
+        />
+      </>
+    );
   }
 
   // Show patient dashboard when authenticated

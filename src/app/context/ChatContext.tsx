@@ -41,6 +41,8 @@ interface ChatContextType {
   sendMessage: () => Promise<void>;
   clearMessages: () => void;
   savePositionAndSize: () => void;
+  rateLimitError: { show: boolean; message: string; resetTime?: string } | null;
+  setRateLimitError: (error: { show: boolean; message: string; resetTime?: string } | null) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -89,6 +91,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<{ show: boolean; message: string; resetTime?: string } | null>(null);
 
   // Position and size states with saved values
   const [position, setPosition] = useState<ChatPosition>(
@@ -97,7 +100,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [size, setSize] = useState<ChatSize>(
     savedState?.size || { width: 400, height: 500 }
   );
-  const [inputHeight, setInputHeight] = useState(savedState?.inputHeight || 80);
+  const [inputHeight, setInputHeight] = useState(savedState?.inputHeight || 120);
 
   // Initialize position on client side if not loaded from storage
   useEffect(() => {
@@ -350,6 +353,17 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 
 
+      if (response.status === 429) {
+        const errorData = await response.json();
+        const resetTime = response.headers.get('X-RateLimit-Reset');
+        setRateLimitError({
+          show: true,
+          message: errorData.error || 'Too many requests. Please try again later.',
+          resetTime: resetTime || undefined
+        });
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to get response');
       }
@@ -397,7 +411,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
     setIsLoading,
     sendMessage,
     clearMessages,
-    savePositionAndSize
+    savePositionAndSize,
+    rateLimitError,
+    setRateLimitError
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

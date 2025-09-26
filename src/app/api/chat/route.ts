@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSalesforceClient } from '@/lib/salesforce';
+import { rateLimiters, getClientIp, checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit(rateLimiters.ai, ip);
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': new Date(rateLimit.reset).toISOString(),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { message, patientContext, medicalRecordsContext, vitalsContext, departmentContext, departmentMetricsContext, currentPage, conversationHistory } = body;
@@ -9,6 +27,13 @@ export async function POST(request: NextRequest) {
     if (!message) {
       return NextResponse.json(
         { error: 'Message is required' },
+        { status: 400 }
+      );
+    }
+
+    if (typeof message !== 'string' || message.length > 300) {
+      return NextResponse.json(
+        { error: 'Message must be a string with maximum 300 characters' },
         { status: 400 }
       );
     }

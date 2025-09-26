@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
+import { useNotification } from '@/app/context/NotificationContext';
 import { Sparkles } from '@/components/ui/sparkles';
 import { motion } from 'framer-motion';
 import remarkGfm from 'remark-gfm';
@@ -192,6 +193,7 @@ const recordTypeConfig = {
 };
 
 export default function MedicalRecordsPage() {
+  const { showNotification } = useNotification();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
@@ -257,6 +259,13 @@ export default function MedicalRecordsPage() {
         }),
       });
 
+      if (response.status === 429) {
+        const errorData = await response.json();
+        showNotification('Rate Limit Reached', errorData.error || 'Too many AI requests. Please try again later.', 'warning');
+        setIsLoadingExplanation(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to get AI explanation');
       }
@@ -320,6 +329,13 @@ export default function MedicalRecordsPage() {
           }
         }),
       });
+
+      if (response.status === 429) {
+        const errorData = await response.json();
+        showNotification('Rate Limit Reached', errorData.error || 'Too many AI requests. Please try again later.', 'warning');
+        setIsLoadingDraft(false);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Failed to draft message');

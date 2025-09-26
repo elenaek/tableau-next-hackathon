@@ -6,7 +6,7 @@ export interface AuthState {
 export const AUTH_STORAGE_KEY = 'tnext_auth_state';
 
 // Server-side authentication via API
-export async function validateCredentials(username: string, password: string): Promise<{ success: boolean; user?: { username: string } }> {
+export async function validateCredentials(username: string, password: string): Promise<{ success: boolean; user?: { username: string }; error?: string; isRateLimited?: boolean }> {
   try {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
@@ -18,14 +18,22 @@ export async function validateCredentials(username: string, password: string): P
 
     const data = await response.json();
 
+    if (response.status === 429) {
+      return {
+        success: false,
+        isRateLimited: true,
+        error: data.error || 'Too many login attempts. Please try again later.'
+      };
+    }
+
     if (!response.ok) {
-      return { success: false };
+      return { success: false, error: data.error };
     }
 
     return data;
   } catch (error) {
     console.error('Authentication error:', error);
-    return { success: false };
+    return { success: false, error: 'Authentication failed' };
   }
 }
 

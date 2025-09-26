@@ -3,15 +3,18 @@
 import { ReactNode } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { AgentforceChat } from '@/components/AgentforceChat';
 
 export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <ChatProvider>
-        {children}
-        <AgentforceChat />
-      </ChatProvider>
+      <NotificationProvider>
+        <ChatProvider>
+          {children}
+          <AgentforceChat />
+        </ChatProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

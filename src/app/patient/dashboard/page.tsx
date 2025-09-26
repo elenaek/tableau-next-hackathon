@@ -30,7 +30,7 @@ import { DemoDisclaimer } from '@/components/DemoDisclaimer';
 import { AnimatedCard } from '@/components/ui/animated-card';
 import { Sparkles } from '@/components/ui/sparkles';
 import { LOCAL_STORAGE_KEYS, decodeHtmlEntities } from '@/lib/utils';
-// import { FloatingNotification } from '@/components/ui/floating-notification';
+import { useNotification } from '@/app/context/NotificationContext';
 
 
 interface ProviderNote {
@@ -342,6 +342,7 @@ const PhysicianSection = ({ patientData }: { patientData: PatientData | null }) 
 };
 
 export default function PatientDashboard() {
+  const { showNotification } = useNotification();
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [diagnosisInsight, setDiagnosisInsight] = useState<AIInsight | null>(null);
   const [progressInsight, setProgressInsight] = useState<AIInsight | null>(null);
@@ -666,6 +667,13 @@ export default function PatientDashboard() {
             context: departmentContext
           })
         });
+
+        if (response.status === 429) {
+          const errorData = await response.json();
+          showNotification('Rate Limit Reached', errorData.error || 'Too many AI requests. Please try again later.', 'warning');
+          return null;
+        }
+
         const res = await response.json();
         return res.insight;
       } catch (error) {
@@ -703,6 +711,13 @@ export default function PatientDashboard() {
           context
         })
       });
+
+      if (response.status === 429) {
+        const errorData = await response.json();
+        showNotification('Rate Limit Reached', errorData.error || 'Too many AI requests. Please try again later.', 'warning');
+        setLoadingInsightType(null);
+        return;
+      }
 
       if (response.ok) {
         const insight = await response.json();

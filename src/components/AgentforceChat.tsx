@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { useChat } from '@/app/context/ChatContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useChatStore } from '@/lib/stores/useChatStore';
+import { FloatingNotification } from '@/components/ui/floating-notification';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -43,7 +44,9 @@ export function AgentforceChat() {
     isLoading,
     sendMessage,
     clearMessages,
-    savePositionAndSize
+    savePositionAndSize,
+    rateLimitError,
+    setRateLimitError
   } = useChat();
 
   // Sync with Zustand store for global access
@@ -220,7 +223,7 @@ export function AgentforceChat() {
             initial={{ x: 100 }}
             animate={{ x: 0 }}
             exit={{ x: 100 }}
-            className="fixed top-1/8 z-50 agentforce-chat-section-tab"
+            className="fixed top-1/6 z-50 agentforce-chat-section-tab"
             style={{ right: '15px' }}
           >
             <Button
@@ -406,7 +409,7 @@ export function AgentforceChat() {
                     </div>
 
                     {/* Input Area */}
-                    <div className="border-t flex-shrink-0 relative" style={{ height: `${inputHeight}px` }}>
+                    <div className="border-t flex-shrink-0 relative min-h-[50px]" style={{ height: `${inputHeight}px` }}>
                       {/* Input resize handle */}
                       <div
                         className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-gray-200/50 z-10"
@@ -415,26 +418,39 @@ export function AgentforceChat() {
                         <div className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-1 bg-gray-400 rounded-full" />
                       </div>
 
-                      <div className="flex gap-2 h-full p-3">
-                        <textarea
-                          ref={textareaRef}
-                          value={input}
-                          onChange={(e) => setInput(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          onFocus={() => setIsFocused(true)}
-                          onBlur={() => setIsFocused(false)}
-                          placeholder="Ask about your medical records, treatment, or health..."
-                          className="flex-1 resize-none p-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                          disabled={isLoading}
-                        />
-                        <Button
-                          onClick={sendMessage}
-                          disabled={isLoading || !input.trim()}
-                          size="sm"
-                          className="px-3 self-end cursor-pointer hover:scale-110 active:scale-95"
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
+                      <div className="flex flex-col gap-1 h-full p-3">
+                        <div className="flex gap-2 flex-1">
+                          <textarea
+                            ref={textareaRef}
+                            value={input}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value.length <= 300) {
+                                setInput(value);
+                              }
+                            }}
+                            onKeyPress={handleKeyPress}
+                            onFocus={() => setIsFocused(true)}
+                            onBlur={() => setIsFocused(false)}
+                            placeholder="Ask about your medical records, treatment, or health..."
+                            className="flex-1 resize-none p-2 rounded-md border bg-background focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            disabled={isLoading}
+                            maxLength={300}
+                          />
+                          <div>
+                            <Button
+                              onClick={sendMessage}
+                              disabled={isLoading || !input.trim()}
+                              size="sm"
+                              className="px-3 self-end cursor-pointer hover:scale-110 active:scale-95"
+                            >
+                              <Send className="h-4 w-4" />
+                            </Button>
+                            <div className="text-xs text-right text-muted-foreground p-2">
+                              {input.length}/300
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -465,6 +481,15 @@ export function AgentforceChat() {
           text-orientation: mixed;
         }
       `}</style>
+
+      <FloatingNotification
+        show={rateLimitError?.show || false}
+        onClose={() => setRateLimitError(null)}
+        title="Rate Limit Reached"
+        description={rateLimitError?.message || 'Too many requests. Please try again later.'}
+        type="warning"
+        duration={6000}
+      />
     </>
   );
 }

@@ -6,7 +6,7 @@ import { LOCAL_STORAGE_KEYS } from '@/lib/utils';
 
 interface AuthContextType {
   authState: AuthState;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{ success: boolean; isRateLimited?: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -50,16 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('beforeunload', () => {
       window.localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
       window.localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+      window.localStorage.setItem(LOCAL_STORAGE_KEYS.VOTING_BANNER, true.toString());
     });
     return () => {
       window.removeEventListener('beforeunload', () => {
         window.localStorage.setItem(LOCAL_STORAGE_KEYS.DEMO_BANNER, true.toString());
         window.localStorage.setItem(LOCAL_STORAGE_KEYS.PROJECT_BANNER, true.toString());
+        window.localStorage.setItem(LOCAL_STORAGE_KEYS.VOTING_BANNER, true.toString());
       });
     }
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; isRateLimited?: boolean; error?: string }> => {
     try {
       // Call server-side authentication API
       const result = await validateCredentials(username, password);
@@ -71,12 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setAuthState(newAuthState);
         saveAuthState(newAuthState);
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, isRateLimited: result.isRateLimited, error: result.error };
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return { success: false, error: 'Login failed' };
     }
   };
 

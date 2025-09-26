@@ -1,10 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
+import { rateLimiters, getClientIp, checkRateLimit } from '@/lib/rate-limit';
 
 const sessions = new Map<string, { username: string; expiresAt: Date }>();
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rateLimit = await checkRateLimit(rateLimiters.auth, ip);
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many login attempts. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': new Date(rateLimit.reset).toISOString(),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { username, password } = body;

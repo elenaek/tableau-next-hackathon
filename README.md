@@ -46,12 +46,28 @@ Bringing **transparency to the ER/Hospital system** by empowering:
 - **Wait Time Predictions** - AI calculates estimated wait times based on occupancy
 - **Department Analytics** - Explains hospital capacity and resource allocation
 - **24/7 Availability** - Always-on support powered by Salesforce Einstein
+- **Character Limit** - 300 character limit on messages for optimal AI responses
+- **Rate Limiting** - Prevents abuse with 10 requests/minute per IP
 
 ### Interactive Guided Tours
 - **First-Time User Onboarding** - Interactive walkthrough of key features
 - **React Joyride Integration** - Step-by-step tooltips and highlights
 - **Contextual Help** - Learn about features as you explore
 - **Persistent Settings** - Tour preferences saved in localStorage
+
+### Rate Limiting & Security
+- **Per-IP Rate Limiting** - Upstash Redis-based rate limiting across all endpoints
+- **Tiered Limits** - Different limits for AI (10/min), Auth (5/15min), Data (30/min)
+- **Graceful Degradation** - Works without Upstash in development
+- **Visual Notifications** - User-friendly warnings when limits are reached
+- **Analytics Tracking** - Built-in analytics for monitoring abuse patterns
+
+### User Notifications
+- **Floating Notifications** - Beautiful animated toast notifications
+- **Rate Limit Warnings** - Clear feedback when API limits are hit
+- **Context-Aware Messaging** - Different messages for different limit types
+- **Auto-Dismiss** - Configurable duration with manual close option
+- **Multiple Banners** - Demo, project info, and voting banners with localStorage persistence
 
 ## 🚀 Quick Start
 
@@ -87,6 +103,10 @@ SALESFORCE_CLIENT_SECRET="your-consumer-secret"
 SALESFORCE_TOKEN_URL="https://your-instance.salesforce.com/services/oauth2/token"
 SALESFORCE_AI_INSIGHTS_MODEL="sfdc_ai__DefaultGPT35Turbo"
 
+# Upstash Redis (for rate limiting - optional in development)
+UPSTASH_REDIS_REST_URL="your-upstash-redis-url"
+UPSTASH_REDIS_REST_TOKEN="your-upstash-redis-token"
+
 # Tableau Next REST API (for dashboard images)
 # Uses existing Salesforce OAuth - no additional config needed
 ```
@@ -118,6 +138,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **Agentforce Model API** - AI-powered insights (Einstein GPT)
 - **Salesforce REST API** - OAuth2 authenticated data access
 - **Tableau Next REST API** - Dashboard image downloads with caching
+- **Upstash Redis** - Serverless rate limiting and analytics
 - **LocalStorage Caching** - Smart session-based caching for performance
 
 ### UI Components
@@ -125,6 +146,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **React Markdown** - Render AI responses with formatting
 - **React Joyride** - Interactive guided tours
 - **Zustand** - Lightweight state management
+- **Framer Motion** - Animated notifications and transitions
 - **Aceternity UI** - Premium animated components
 
 ## 📁 Project Structure
@@ -140,9 +162,10 @@ src/
 │   │   ├── chat/          # Agentforce chat API
 │   │   └── tableau-image/ # Tableau dashboard snapshots
 │   ├── context/           # React contexts
-│   │   ├── AuthContext.tsx    # Authentication state
-│   │   ├── ChatContext.tsx    # Chat state management
-│   │   └── TourContext.tsx    # Guided tour state
+│   │   ├── AuthContext.tsx        # Authentication state
+│   │   ├── ChatContext.tsx        # Chat state management
+│   │   ├── TourContext.tsx        # Guided tour state
+│   │   └── NotificationContext.tsx # Global notifications
 │   ├── patient/           # Patient portal pages
 │   │   ├── dashboard/     # Main patient dashboard
 │   │   ├── records/       # Medical records viewer
@@ -155,6 +178,7 @@ src/
 │   ├── AgentforceChat.tsx # AI chat interface
 │   └── TableauNextDashboard.tsx # Tableau dashboard component
 └── lib/
+    ├── rate-limit.ts      # Upstash rate limiting
     └── salesforce/        # Salesforce API client
 ```
 
@@ -162,6 +186,11 @@ src/
 
 - **Server-side Authentication** - Credentials never exposed to client
 - **Session Management** - HTTP-only cookies for security
+- **Rate Limiting** - Per-IP limits on all API endpoints
+  - AI endpoints: 10 requests/minute
+  - Auth endpoints: 5 requests/15 minutes
+  - Data endpoints: 30 requests/minute
+- **Input Validation** - Character limits and type checking on all inputs
 - **SQL Injection Protection** - Parameterized queries and input validation
 - **API Route Protection** - Middleware-based authentication
 - **HIPAA Considerations** - Secure data handling practices
@@ -175,6 +204,9 @@ src/
 - **Collapsible Sidebar** - Maximizes screen space for content
 - **Smart Caching** - Instant loading with session-based cache
 - **Draggable Chat** - Reposition AI assistant anywhere on screen
+- **Floating Notifications** - Beautiful toast notifications for user feedback
+- **Dismissible Banners** - Demo, project, and voting banners with persistence
+- **Character Counters** - Real-time feedback on input limits
 
 ## 📊 Data Flow
 
@@ -214,6 +246,16 @@ If you encounter peer dependency warnings with React 19:
 - Ensure the `.npmrc` file is committed to your repository
 - The build uses Next.js 15.5.3 with Turbopack for optimal performance
 
+### Rate Limiting Setup
+To enable rate limiting in production:
+1. Create a free account at [upstash.com](https://upstash.com)
+2. Create a new Redis database
+3. Copy the REST URL and Token
+4. Add to Vercel environment variables:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+5. Rate limiting works without these in development (graceful degradation)
+
 ## 🤝 Contributing
 
 This project was created for the Tableau Next Hackathon. While it's primarily a demonstration, we welcome feedback and suggestions for improving healthcare transparency.
@@ -228,6 +270,9 @@ This project was created for the Tableau Next Hackathon. While it's primarily a 
 - **AI Wait Time Predictions** - Intelligent formula-based estimations by priority
 - **React 19 Compatibility** - Using legacy peer deps for library compatibility
 - **Guided Tour Support** - Interactive onboarding for new users
+- **Rate Limiting** - Production-ready with Upstash Redis, graceful degradation in dev
+- **Character Limits** - 300 character max on chat messages for optimal AI performance
+- **User Notifications** - Visual feedback for rate limits and system messages
 
 ## 🏆 Hackathon Focus Areas
 

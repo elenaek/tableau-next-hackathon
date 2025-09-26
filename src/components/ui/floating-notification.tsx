@@ -95,7 +95,7 @@ export const FloatingNotification = ({
               {onClose && (
                 <button
                   onClick={onClose}
-                  className="ml-2 hover:opacity-70 transition-opacity"
+                  className="ml-2 hover:opacity-70 transition-opacity cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
