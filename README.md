@@ -1,4 +1,4 @@
-# Patient Transparency Portal - Tableau Next Hackathon 🏥
+# Patient Transparency Portal: Tableau Next Hackathon 🏥 ([Winner - Best Design](https://devpost.com/software/hospital-inpatient-discharge-journey?_gl=1*1wstyeo*_gcl_au*MjM3NTcwMjkzLjE3NTkxNzE3MTE.*_ga*OTkzNjMwMTYyLjE3NTkxNzE3MTE.*_ga_0YHJK3Y10M*czE3NjA1NjExMjYkbzMyJGcxJHQxNzYwNTYzMTAyJGoxNyRsMCRoMA..))
 
 A healthcare transparency solution built for the **Tableau Next Hackathon**, demonstrating the power of Salesforce's ecosystem to bring clarity and understanding to the patient care journey.
 
@@ -285,9 +285,17 @@ This project was created for the Tableau Next Hackathon. While it's primarily a 
 
 This project is part of the Tableau Next Hackathon submission and is intended for demonstration purposes.
 
+---
+
+## 🙏 Acknowledgments
+
+- **Devpost** for hosting the Tableau Next Virtual Hackathon (2025)
+- **Tableau/Salesforce** for Sponsoring the Tableau Next Virtual Hackathon (2025)
+---
+
 ## 👥 Team
 
-Created with ❤️ for the Tableau Next Hackathon
+Created with ❤️ for the Tableau Next Virtual Hackathon (2025)
 
 ---
 
