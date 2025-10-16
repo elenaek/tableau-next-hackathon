@@ -1,11 +1,17 @@
 # Patient Transparency Portal: Tableau Next Hackathon 🏥 ([Winner - Best Design](https://devpost.com/software/hospital-inpatient-discharge-journey?_gl=1*1wstyeo*_gcl_au*MjM3NTcwMjkzLjE3NTkxNzE3MTE.*_ga*OTkzNjMwMTYyLjE3NTkxNzE3MTE.*_ga_0YHJK3Y10M*czE3NjA1NjExMjYkbzMyJGcxJHQxNzYwNTYzMTAyJGoxNyRsMCRoMA..))
 
+<div align="center">
+
 A healthcare transparency solution built for the **Tableau Next Hackathon**, demonstrating the power of Salesforce's ecosystem to bring clarity and understanding to the patient care journey.
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.3-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![Salesforce](https://img.shields.io/badge/Salesforce-Platform-00A1E0?style=for-the-badge&logo=salesforce)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS_v4-38B2AC?style=for-the-badge&logo=tailwind-css)
+
+• [YouTube Demo](https://www.youtube.com/watch?v=pQs42Ow2SXo)
+
+</div>
 
 ## 🎯 Project Vision
 
